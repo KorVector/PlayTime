@@ -1,0 +1,100 @@
+/* 💡 [사용자 채팅방] [소통 커뮤니티] [영화 시청 타이머] 포맷 코드 */
+
+/* ========================================================== */
+
+/* ✅ movie point & 설명 글자 사이 간격 */
+
+.features-section {
+  position: relative;
+  width: 100%;
+  padding: 100px 40px;
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+/* ========================================================== */
+
+/* ✅ 카드 그리드 가로 정렬 코드 */
+
+.features-grid {
+  display: flex;
+  justify-content: center;
+  gap: 80px;
+  flex-wrap: wrap;
+  margin: 0 auto;
+  max-width: 1400px;
+  width: 100%;
+}
+
+/* ========================================================== */
+
+/* ✅ 카드 그리드 간격 코드 */
+
+/*
+.features-divider {
+  width: 100%;
+  max-width: 1415px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.63);
+  margin: 40px auto;
+}
+*/
+
+.features-divider {
+  width: 100%;
+  max-width: 1415px;
+  background: rgba(255, 255, 255, 0.63);
+  margin: 40px auto;
+}
+
+/* ========================================================== */
+
+/* ✅ 카드 그리드 및 글귀 스타일 코드 */
+
+.features-tagline {
+  width: 747px;
+  text-align: center;
+  color: white;
+  font-size: 20px;
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 500;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ========================================================== */
+
+@media (max-width: 1024px) {
+  .features-section {
+    padding: 60px 20px;
+  }
+
+  .features-grid {
+    gap: 40px;
+  }
+
+  .features-tagline {
+    width: 90%;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .features-section {
+    padding: 40px 20px;
+    gap: 40px;
+  }
+
+  .features-grid {
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+  }
+
+  .features-tagline {
+    width: 100%;
+    font-size: 14px;
+  }
+}

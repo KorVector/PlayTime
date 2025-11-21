@@ -1,0 +1,90 @@
+/* 💡 한국 영화 순위 코드 */
+
+/* ========================================================== */
+
+.stats-section {
+  position: relative;
+  width: 100%;
+  padding: 100px 40px;
+  background-color: black;
+}
+
+/* ========================================================== */
+
+/* ✅ 통계 컨테이너 가로 정렬 코드 */
+
+.stats-container {
+  display: flex;
+  justify-content: center;
+  gap: 80px;
+  flex-wrap: wrap;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ========================================================== */
+
+.stat-item {
+  position: relative;
+  text-align: center;
+}
+
+/* ========================================================== */
+
+/* ✅ 통계 컨테이너 스타일 코드 */
+
+.stat-image {
+  width: 298px;
+  height: 420px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* ========================================================== */
+
+/* ✅ 조회수 폰트 스타일 코드 */
+
+.stat-value {
+  color: white;
+  font-size: 32px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  margin: 20px 0 0;
+  text-align: center;
+}
+
+/* ========================================================== */
+
+@media (max-width: 1024px) {
+  .stats-container {
+    gap: 50px;
+  }
+
+  .stat-image {
+    width: 250px;
+    height: 350px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-section {
+    padding: 50px 20px;
+  }
+
+  .stats-container {
+    gap: 30px;
+  }
+
+  .stat-image {
+    width: 200px;
+    height: 280px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+}

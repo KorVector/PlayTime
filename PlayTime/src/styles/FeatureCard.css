@@ -1,0 +1,128 @@
+/* 💡 [사용자 채팅방] [소통 커뮤니티] [영화 시청 타이머] 포맷 코드 */
+
+/* ========================================================== */
+
+/* ✅ 3가지 기능 카드 컨테이너 스타일 코드 */
+/* 나중에 수정하기 */
+
+.feature-card {
+  position: relative;
+  width: 335px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ========================================================== */
+
+/* ✅ 3가지 기능 제목 스타일 코드 */
+.feature-title {
+  color: white;
+  font-size: 30px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+/* ========================================================== */
+
+/* ✅ 3가지 기능 설명 스타일 코드 */
+
+.feature-description {
+  color: white;
+  font-size: 15px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+/* ========================================================== */
+
+/* ✅ 바로가기 3개 버튼 스타일 코드 */
+
+/*
+.feature-button {
+  width: 367px;
+  height: 64px;
+  background: rgba(39.31, 39.31, 39.31, 0.3);
+  border: none;
+  border-radius: 50px;
+  color: white;
+  font-size: 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+  margin-top: 10px;
+}
+*/
+
+.feature-card {
+  position: relative;
+  width: 335px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* ✅ 카드 내부 모든 요소를 중앙정렬 */
+  gap: 20px;
+}
+
+.feature-button {
+  width: 367px;
+  max-width: 100%; /* ✅ 반응형 */
+  height: 64px;
+  background: rgba(39, 39, 39, 0.3);
+  border: none;
+  border-radius: 50px;
+  color: white;
+  font-size: 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+
+  /* ✅ 버튼을 제목 기준 중앙으로 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto; /* 🔥 핵심: 수평 중앙정렬 */
+}
+
+.feature-button:hover {
+  opacity: 1;
+}
+
+/* ========================================================== */
+
+.feature-button:hover {
+  opacity: 1;
+}
+
+/* ========================================================== */
+
+@media (max-width: 768px) {
+  .feature-card {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .feature-title {
+    font-size: 22px;
+  }
+
+  .feature-description {
+    font-size: 13px;
+  }
+
+  .feature-button {
+    width: 100%;
+    height: 50px;
+    font-size: 16px;
+  }
+}

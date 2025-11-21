@@ -1,3 +1,21 @@
+/* src/index.css */
+
+/* 1. CSS 리셋 (기본 여백 제거)
+  모든 태그(*)의 margin과 padding을 0으로 만듭니다.
+*/
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* 2. (초강력 추천) 테두리 계산 방식 변경 */
+}
+
+/* (옵션) body가 화면을 꽉 채우게 합니다. */
+body, #root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
