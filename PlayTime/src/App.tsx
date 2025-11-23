@@ -48,6 +48,11 @@ const backgroundImagePath = '/common.jpg'; // <-- 이 부분을 실제 이미지
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const openModal = () => {
+    setIsModalOpen(true);
+    console.log("로그인 창 열기 신호 보냄!");
+  };
+
   const closeModal = () => {
     setIsModalOpen(false);
   };
@@ -55,26 +60,18 @@ function App() {
   return (
     <div className="app-container">
       
-      <Header />
+      {/* 2. Header에게 openModal 함수를 'onLoginClick'이라는 이름으로 전달 */}
+      <Header onLoginClick={openModal} />
       
       <main> 
         <HeroSection />
-        
-        {/* 이제 이 코드는 오류가 없습니다! */}
-        <MovieCarousel 
-          title="🔥 지금 인기있는 영화" 
-          movies={dummyMovies} 
-        />
-        
+        <MovieCarousel title="🔥 지금 인기있는 영화" movies={dummyMovies} />
         <FeaturesSection />
       </main>
       
       <Footer />
       
-      <AuthModal 
-        open={isModalOpen} 
-        onClose={closeModal} 
-      />
+      <AuthModal open={isModalOpen} onClose={closeModal} />
     </div>
   )
 }

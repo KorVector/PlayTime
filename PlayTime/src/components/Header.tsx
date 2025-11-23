@@ -8,7 +8,7 @@ interface HeaderProps {
   onLoginClick: () => void;
 }
 
-// 2. Props로 onLoginClick 받아오기
+// 2. Props로 onLoginClick함수 받아오기
 const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   return (
     <header className="header">

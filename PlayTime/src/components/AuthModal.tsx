@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import '../styles/AuthModal.css';
+// 1. Firebase 도구들을 가져옵니다.
+import { auth } from '../firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 interface AuthModalProps {
   open: boolean;
@@ -14,17 +17,46 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
 
   if (!open) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (tab === 'login') {
-      // TODO: replace with real auth flow
-      console.log('로그인 시도', { email, password });
-      alert('로그인 시뮬레이션: ' + email);
-      onClose();
-    } else {
-      console.log('회원가입 시도', { name, email, password });
-      alert('회원가입 시뮬레이션: ' + name);
-      onClose();
+
+    try {
+      if (tab === 'signup') {
+        // 2. 회원가입 로직 (진짜 Firebase 사용)
+        // (1) 이메일과 비번으로 계정 생성
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // (2) 프로필에 '이름' 추가 저장
+        await updateProfile(userCredential.user, {
+          displayName: name,
+        });
+
+        alert(`환영합니다, ${name}님! 회원가입 성공! 🎉`);
+        onClose(); // 모달 닫기
+
+      } else {
+        // 3. 로그인 로직 (진짜 Firebase 사용)
+        await signInWithEmailAndPassword(auth, email, password);
+        
+        alert(`로그인 되었습니다!`);
+        onClose(); // 모달 닫기
+      }
+    } catch (error: any) {
+      // 4. 에러 처리 (실패했을 때)
+      console.error("에러 발생:", error);
+      
+      // 친절한 에러 메시지 보여주기
+      if (error.code === 'auth/email-already-in-use') {
+        alert('이미 사용 중인 이메일입니다.');
+      } else if (error.code === 'auth/invalid-email') {
+        alert('이메일 형식이 올바르지 않습니다.');
+      } else if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+        alert('이메일 혹은 비밀번호가 일치하지 않습니다.');
+      } else if (error.code === 'auth/weak-password') {
+        alert('비밀번호는 6자리 이상이어야 합니다.');
+      } else {
+        alert('로그인/회원가입 실패: ' + error.message);
+      }
     }
   };
 
@@ -45,18 +77,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
           {tab === 'signup' && (
             <label className="auth-label">
               이름
-              <input className="auth-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="이름" />
+              <input className="auth-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="이름" required />
             </label>
           )}
 
           <label className="auth-label">
-            이메일 
+            이메일
             <input className="auth-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
           </label>
 
           <label className="auth-label">
             비밀번호
-            <input className="auth-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="비밀번호" required />
+            <input className="auth-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="비밀번호 (6자리 이상)" required />
           </label>
 
           <button className="auth-submit" type="submit">{tab === 'login' ? '로그인' : '회원가입'}</button>
