@@ -1,85 +1,42 @@
-/* src/App.css */
-
-body {
+* {
   margin: 0;
-  background-color: #000;
-  color: white;
-  font-family: sans-serif;
-}
-
-.app {
-  text-align: center;
-}
-
-.main-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 40px;
-  background-color: #111;
-  position: fixed;
-  width: calc(100% - 80px);
-  top: 0;
-  left: 0;
-  z-index: 1000;
-}
-
-.logo {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.main-nav a, .main-nav button {
-  color: white;
-  text-decoration: none;
-  margin-left: 20px;
-  font-size: 16px;
-}
-
-.login-btn {
-  background: transparent;
-  border: 1px solid white;
-  padding: 8px 16px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.hero-section {
-  height: 100vh;
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 0 20px;
+  padding: 0;
   box-sizing: border-box;
 }
 
-.hero-text {
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 30px;
-  border-radius: 10px;
+html {
+  scroll-behavior: smooth;
 }
 
-.hero-text p {
-  font-size: 18px;
-  max-width: 600px;
-  margin-bottom: 30px;
-  line-height: 1.6;
-}
-
-.recommend-btn {
-  background-color: #333;
+body {
+  background-color: black;
   color: white;
-  border: 1px solid #555;
-  padding: 15px 30px;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 30px;
-  transition: background-color 0.3s;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.recommend-btn:hover {
-  background-color: #555;
+#root {
+  width: 100%;
+  background-color: black;
+}
+
+.app {
+  width: 100%;
+  overflow-x: hidden;
+  background-color: black;
+}
+
+button {
+  font-family: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

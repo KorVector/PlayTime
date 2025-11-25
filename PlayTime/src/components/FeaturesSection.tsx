@@ -147,10 +147,13 @@ export default FeaturesSection;
 // export default FeaturesSection;
 
 import React from 'react';
+import { useResponsive } from '../hooks/useResponsive';
 import FeatureCard from './FeatureCard';
 import '../styles/FeaturesSection.css';
 
 const FeaturesSection: React.FC = () => {
+  const { isMobile, isTablet } = useResponsive();
+
   const features = [
     {
       id: 1,
@@ -172,8 +175,13 @@ const FeaturesSection: React.FC = () => {
     },
   ];
 
+  const boxWidth = isMobile ? 'calc(100% - 40px)' : isTablet ? 'calc(100% - 60px)' : 1647;
+  const boxHeight = isMobile ? 'auto' : isTablet ? 'auto' : 734;
+  const pointBoxWidth = isMobile ? '90%' : isTablet ? '80%' : 367;
+  const pointBoxHeight = isMobile ? 52 : isTablet ? 58 : 64;
+
   return (
-    <section className="features-section">
+    <section className={`features-section ${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'}`}>
       <div className="features-grid">
         {features.map((feature) => (
           <FeatureCard
@@ -188,52 +196,30 @@ const FeaturesSection: React.FC = () => {
 
       <div className="features-divider"></div>
 
-      {/* ✅ Movie Point 반투명 박스 */}
+      {/* Movie Point 반투명 박스 */}
       <div
+        className="movie-point-box"
         style={{
-          width: 367,
-          height: 64,
-          margin: '0 auto',
-          background: 'rgba(39, 39, 39, 0.3)',
-          borderRadius: 50,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: 0.7,
+          width: pointBoxWidth,
+          height: pointBoxHeight,
         }}
       >
-        <span
-          style={{
-            textAlign: 'center',
-            color: 'white',
-            fontSize: 20,
-            fontFamily: 'DM Sans',
-            fontWeight: 600,
-            lineHeight: '20px',
-          }}
-        >
+        <span className="movie-point-text">
           Movie Point
         </span>
       </div>
 
-      {/* ✅ 문장 (32px 간격 유지) */}
-      <p
-        className="features-tagline"
-        style={{
-          marginTop: -32, // Movie Point와의 간격 정확히 32px
-        }}
-      >
+      {/* 문장 */}
+      <p className="features-tagline">
         단순 영화 추천을 넘어 다양한 사람들과 시청한 영화를 추천하고 추천받을 수 있는 서비스
       </p>
 
-      {/* ✅ 문장 아래 50px 간격 반투명 박스 */}
+      {/* 배경 박스 */}
       <div
+        className="features-bg-box"
         style={{
-          width: 1647,
-          height: 734,
-          background: 'rgba(255, 255, 255, 0.20)',
-          borderRadius: 17,
-          margin: '-25px auto 120px', // ✅ 아래쪽 50px 공백 추가
+          width: boxWidth,
+          minHeight: boxHeight,
         }}
       />
     </section>

@@ -18,9 +18,9 @@
   position: relative;
   width: 100%;
   padding: 40px;
+  background-color: black;
+  box-sizing: border-box;
 }
-
-/* ========================================================== */
 
 .footer-divider {
   width: 100%;
@@ -40,12 +40,45 @@
   text-align: center;
 }
 
-@media (max-width: 768px) {
+/* 태블릿 (641px - 1024px) */
+@media (max-width: 1024px) and (min-width: 641px) {
+  .footer {
+    padding: 35px 30px;
+  }
+
+  .footer-text {
+    font-size: 13px;
+  }
+}
+
+/* 모바일 (max-width: 640px) */
+@media (max-width: 640px) {
   .footer {
     padding: 30px 20px;
   }
 
+  .footer-divider {
+    margin: 0 auto 15px;
+  }
+
   .footer-text {
     font-size: 12px;
+    margin: 15px 0 0;
+  }
+}
+
+/* 초소형 모바일 (max-width: 360px) */
+@media (max-width: 360px) {
+  .footer {
+    padding: 25px 15px;
+  }
+
+  .footer-divider {
+    margin: 0 auto 12px;
+  }
+
+  .footer-text {
+    font-size: 11px;
+    margin: 12px 0 0;
   }
 }

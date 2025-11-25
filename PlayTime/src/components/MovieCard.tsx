@@ -64,7 +64,7 @@ interface MovieCardProps {
   image?: string;
   title: string;
   date: string;
-  rating: number;//기존 rating의 속성이 string으로 되어있어서 number로 수정
+  rating: string;
   languages: string[];
   onChatClick?: () => void;
   onLikeClick?: (liked: boolean) => void;
@@ -97,11 +97,19 @@ const MovieCard: React.FC<MovieCardProps> = ({
       
       <div className="movie-info">
         <h3 className="movie-title">{title}</h3>
-        <p className="movie-date">{date}</p>
-        <p className="movie-rating">{rating}</p>
+        <div className="movie-meta">
+          <div className="movie-rating" aria-hidden>
+            <svg className="star" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="#FFD166"/>
+            </svg>
+            <span className="rating-value">{(Number(rating) || 0).toFixed(1)}</span>
+          </div>
+
+          <p className="movie-date">{date}</p>
+        </div>
       </div>
 
-      {/* 하단: 언어태그 + 채팅버튼(왼쪽), 찜 버튼(오른쪽) */}
+      {/* 하단: 언어태그(왼쪽), 채팅버튼 + 찜(오른쪽) */}
       <div className="movie-actions">
         <div className="actions-left">
           <div className="movie-languages">
@@ -109,13 +117,13 @@ const MovieCard: React.FC<MovieCardProps> = ({
               <span key={idx} className="language-tag">{lang}</span>
             ))}
           </div>
-
-          <button className="chat-button" onClick={onChatClick}>
-            채팅방 바로가기
-          </button>
         </div>
 
         <div className="actions-right">
+          <button className="chat-button chat-near-heart" onClick={onChatClick}>
+            채팅방 바로가기
+          </button>
+
           <HeartIcon 
             liked={isLiked}
             onClick={handleLikeClick}

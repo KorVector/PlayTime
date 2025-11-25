@@ -45,6 +45,7 @@ export default StatsSection;
 */
 
 import React from 'react';
+import { useResponsive } from '../hooks/useResponsive';
 import '../styles/StatsSection.css';
 
 interface Stat {
@@ -54,6 +55,8 @@ interface Stat {
 }
 
 const StatsSection: React.FC = () => {
+  const { isMobile, isTablet } = useResponsive();
+
   const stats: Stat[] = [
     {
       id: 1,
@@ -72,40 +75,25 @@ const StatsSection: React.FC = () => {
     },
   ];
 
+  const boxWidth = isMobile ? '85%' : isTablet ? '80%' : 367;
+  const boxHeight = isMobile ? 52 : isTablet ? 58 : 64;
+  const boxTop = isMobile ? -80 : isTablet ? -90 : -100;
+
   return (
-    <section className="stats-section">
+    <section className={`stats-section ${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'}`}>
       <div className="stats-container">
         {stats.map((stat) => (
           <div key={stat.id} className="stat-item" style={{ position: 'relative' }}>
-            {/* ✅ 두 번째(stat.id === 2) 이미지 위에만 박스 */}
             {stat.id === 2 && (
               <div
+                className="ranking-label-box"
                 style={{
-                  width: 367,
-                  height: 64,
-                  position: 'absolute',
-                  top: -100,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  background: 'rgba(39.31, 39.31, 39.31, 0.30)',
-                  borderRadius: 50,
+                  width: boxWidth,
+                  height: boxHeight,
+                  top: boxTop,
                 }}
               >
-                <div
-                  style={{
-                    left: 85,
-                    top: 22,
-                    position: 'absolute',
-                    opacity: 0.7,
-                    textAlign: 'center',
-                    color: 'white',
-                    fontSize: 20,
-                    fontFamily: 'DM Sans',
-                    fontWeight: 600,
-                    lineHeight: '20px',
-                    wordWrap: 'break-word',
-                  }}
-                >
+                <div className="ranking-label-text">
                   Korea Movie Ranking
                 </div>
               </div>

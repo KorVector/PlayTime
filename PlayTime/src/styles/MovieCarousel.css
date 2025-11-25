@@ -6,78 +6,57 @@
 .movie-carousel {
   position: relative;
   width: 100%;
-  max-width: 100%;
   padding: 80px 0;
   background-color: black;
   overflow: hidden;
 }
 
-/* ========================================================== */
-
-/* ✅ 제목 스타일 코드 */
-
-/*
 .carousel-title {
   text-align: center;
-  color: #00ff2f;
   font-size: 35px;
   font-family: 'DM Sans', sans-serif;
   font-weight: 700;
   margin: 0 0 60px;
-}
-*/
-
-  .carousel-title {
-  text-align: center;
-  font-size: 35px;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
-  margin: 0 0 60px;
-
   background: linear-gradient(
     90deg,
     #ff2df7 25%,
     #00c9df 50%,
     #00ff2f 65%
   );
-
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
-/* ========================================================== */
-
-/* ✅ 캐러셀 컨테이너 및 영화 그리드 정렬 코드 */
 
 .carousel-container {
   width: 100%;
   max-width: 1800px;
   margin: 0 auto;
   padding: 0 20px;
+  box-sizing: border-box;
 }
-
-/* ========================================================== */
-
-/* ✅ 영화 그리드 가로 정렬 + 간격 조정 스타일 코드 */
 
 .movies-grid {
   display: flex;
-  gap: 30px;
-  overflow-x: auto;
+  gap: 72px;
   padding: 40px 20px;
-  justify-content: center; 
   align-items: flex-start;
+  justify-content: center;
   scroll-behavior: smooth;
+  overflow-x: auto;
 }
 
-/* ========================================================== */
+.movies-grid.grid-2 {
+  gap: 72px;
+}
+
+.movies-grid.grid-3 {
+  gap: 72px;
+}
 
 .movies-grid::-webkit-scrollbar {
   height: 8px;
 }
-
-/* ========================================================== */
 
 .movies-grid::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
@@ -92,9 +71,6 @@
 .movies-grid::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
-/* ========================================================== */
-
-/* ✅ '영화 정보 더보기 →' 오른쪽 정렬 코드 */
 
 .carousel-controls {
   display: flex;
@@ -102,10 +78,6 @@
   align-items: center;
   padding: 20px 40px 0;
 }
-
-/* ========================================================== */
-
-/* ✅ '영화 정보 더보기 →' 폰트 스타일 코드 */
 
 .more-info {
   color: white;
@@ -117,36 +89,104 @@
   transition: opacity 0.3s ease;
 }
 
-/* ========================================================== */
-
-/* ✅ '영화 정보 더보기 →' 호버 효과 코드 */
-
 .more-info:hover {
   opacity: 0.8;
 }
 
-/* ========================================================== */
+/* 태블릿 (641px - 1024px) */
+@media (max-width: 1024px) and (min-width: 641px) {
+  .movie-carousel {
+    padding: 60px 0;
+  }
 
-@media (max-width: 768px) {
+  .carousel-title {
+    font-size: 28px;
+    margin-bottom: 50px;
+  }
+
+  .carousel-container {
+    padding: 0 15px;
+  }
+
+  .movies-grid {
+    gap: 48px;
+    padding: 30px 15px;
+    overflow-x: auto;
+    justify-content: center;
+  }
+
+  .carousel-controls {
+    padding: 15px 30px 0;
+  }
+
+  .more-info {
+    font-size: 18px;
+  }
+}
+
+/* 모바일 (max-width: 640px) */
+@media (max-width: 640px) {
   .movie-carousel {
     padding: 40px 0;
   }
 
   .carousel-title {
-    font-size: 24px;
-    margin-bottom: 40px;
+    font-size: 22px;
+    margin-bottom: 35px;
+  }
+
+  .carousel-container {
+    padding: 0 10px;
   }
 
   .movies-grid {
-    gap: 15px;
+    gap: 28px;
     padding: 20px 10px;
+    overflow-x: auto;
+    justify-content: center;
+  }
+
+  .movies-grid.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
   }
 
   .carousel-controls {
-    padding: 10px 20px 0;
+    padding: 15px 20px 0;
   }
 
   .more-info {
     font-size: 14px;
+  }
+}
+
+/* 초소형 모바일 (max-width: 360px) */
+@media (max-width: 360px) {
+  .movie-carousel {
+    padding: 30px 0;
+  }
+
+  .carousel-title {
+    font-size: 18px;
+    margin-bottom: 25px;
+  }
+
+  .carousel-container {
+    padding: 0 8px;
+  }
+
+  .movies-grid {
+    gap: 20px;
+    padding: 15px 8px;
+    overflow-x: auto;
+    justify-content: center;
+  }
+
+  .carousel-controls {
+    padding: 12px 16px 0;
+  }
+
+  .more-info {
+    font-size: 12px;
   }
 }
