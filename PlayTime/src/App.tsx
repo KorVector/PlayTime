@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AuthProvider } from './contexts/AuthContext';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import MovieCarousel from './components/MovieCarousel';
@@ -19,19 +20,21 @@ function App() {
   (window as any).openLiked = () => setLikedOpen(true);
 
   return (
-    <div className="app">
-      <Header onLoginClick={() => setAuthOpen(true)} onShowLiked={() => setLikedOpen(true)} />
-      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
-      <LikedModal open={likedOpen} onClose={() => setLikedOpen(false)} />
-      <LikedModal open={likedOpen} onClose={() => setLikedOpen(false)} />
-      <HeroSection />
-      <MovieCarousel title="취향을 알아가는 순간, 영화는 더 재미있어진다.">
-        <MovieList />
-      </MovieCarousel>
-      <FeaturesSection />
-      <StatsSection />
-      <Footer />
-    </div>
+    <AuthProvider>
+      <div className="app">
+        <Header onLoginClick={() => setAuthOpen(true)} onShowLiked={() => setLikedOpen(true)} />
+        <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+        <LikedModal open={likedOpen} onClose={() => setLikedOpen(false)} />
+        <LikedModal open={likedOpen} onClose={() => setLikedOpen(false)} />
+        <HeroSection />
+        <MovieCarousel title="취향을 알아가는 순간, 영화는 더 재미있어진다.">
+          <MovieList />
+        </MovieCarousel>
+        <FeaturesSection />
+        <StatsSection />
+        <Footer />
+      </div>
+    </AuthProvider>
   );
 }
 
