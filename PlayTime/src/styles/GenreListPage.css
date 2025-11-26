@@ -1,0 +1,162 @@
+.genre-list-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #121419 0%, #1a1d26 100%);
+  padding: 60px 20px;
+}
+
+.genre-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-title {
+  color: white;
+  font-size: 48px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.page-description {
+  color: #9ca3af;
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 60px;
+  line-height: 1.6;
+}
+
+.genre-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.genre-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid;
+  border-radius: 17px;
+  padding: 32px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.genre-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.genre-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  transition: transform 0.3s ease;
+}
+
+.genre-card:hover .genre-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.genre-name {
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.genre-button {
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.genre-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* 태블릿 */
+@media (max-width: 1024px) {
+  .page-title {
+    font-size: 36px;
+  }
+
+  .page-description {
+    font-size: 16px;
+    margin-bottom: 40px;
+  }
+
+  .genre-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  .genre-card {
+    padding: 28px;
+  }
+
+  .genre-icon {
+    width: 70px;
+    height: 70px;
+    font-size: 36px;
+  }
+
+  .genre-name {
+    font-size: 20px;
+  }
+}
+
+/* 모바일 */
+@media (max-width: 640px) {
+  .genre-list-page {
+    padding: 40px 15px;
+  }
+
+  .page-title {
+    font-size: 28px;
+  }
+
+  .page-description {
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+
+  .genre-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
+  .genre-card {
+    padding: 24px;
+  }
+
+  .genre-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 32px;
+  }
+
+  .genre-name {
+    font-size: 18px;
+  }
+
+  .genre-button {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
+}

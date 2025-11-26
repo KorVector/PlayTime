@@ -1,0 +1,156 @@
+.chat-main-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #121419 0%, #1a1d26 100%);
+  padding: 60px 20px;
+}
+
+.chat-main-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-title {
+  color: white;
+  font-size: 48px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.page-description {
+  color: #9ca3af;
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 60px;
+  line-height: 1.6;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.menu-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 17px;
+  padding: 40px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.menu-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.menu-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.menu-title {
+  color: white;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.menu-description {
+  color: #9ca3af;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.menu-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menu-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* 태블릿 */
+@media (max-width: 1024px) {
+  .page-title {
+    font-size: 36px;
+  }
+
+  .page-description {
+    font-size: 16px;
+    margin-bottom: 40px;
+  }
+
+  .menu-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .menu-card {
+    padding: 32px;
+  }
+
+  .menu-icon {
+    font-size: 52px;
+  }
+
+  .menu-title {
+    font-size: 22px;
+  }
+}
+
+/* 모바일 */
+@media (max-width: 640px) {
+  .chat-main-page {
+    padding: 40px 15px;
+  }
+
+  .page-title {
+    font-size: 28px;
+  }
+
+  .page-description {
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+
+  .menu-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .menu-card {
+    padding: 28px;
+  }
+
+  .menu-icon {
+    font-size: 48px;
+  }
+
+  .menu-title {
+    font-size: 20px;
+  }
+
+  .menu-description {
+    font-size: 14px;
+  }
+
+  .menu-button {
+    padding: 12px 28px;
+    font-size: 14px;
+  }
+}
