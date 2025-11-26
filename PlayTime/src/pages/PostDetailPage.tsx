@@ -1,55 +1,41 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { doc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, updateDoc, increment, Timestamp } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useAuth } from '../contexts/AuthContext';
 import { useResponsive } from '../hooks/useResponsive';
 import '../styles/PostDetailPage.css';
 
 interface Comment {
-  id: number;
-  author: string;
-  text: string;
-  timestamp: Date;
+  id: string;
+  postId: string;
+  authorId: string;
+  authorName: string;
+  content: string;
+  createdAt: Timestamp;
 }
 
 interface Post {
-  id: number;
-  author: string;
+  id: string;
+  authorId: string;
+  authorName: string;
   title: string;
   content: string;
-  timestamp: Date;
-  likes: number;
+  createdAt: Timestamp;
+  commentCount: number;
 }
 
 const PostDetailPage: React.FC = () => {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { isMobile, isTablet } = useResponsive();
-  const [post] = useState<Post>({
-    id: Number(postId),
-    author: '영화광123',
-    title: '이 영화 진짜 최고예요!',
-    content: '스토리도 좋고 연기도 훌륭했어요. 액션 씬은 정말 압권이었고, 감동적인 엔딩까지 완벽했습니다. 여러분도 꼭 보세요! 후회하지 않으실 거예요.',
-    timestamp: new Date(Date.now() - 3600000),
-    likes: 15,
-  });
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: 1,
-      author: '시네마러버',
-      text: '저도 봤는데 정말 좋더라구요!',
-      timestamp: new Date(Date.now() - 1800000),
-    },
-    {
-      id: 2,
-      author: '무비팬',
-      text: '이번 주말에 보러 가야겠어요',
-      timestamp: new Date(Date.now() - 900000),
-    },
-  ]);
+  const [post, setPost] = useState<Post | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
-  const [liked, setLiked] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
-  
-  const COMMENT_PROBABILITY = 0.8;
 
   const scrollToBottom = () => {
     commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -59,50 +45,124 @@ const PostDetailPage: React.FC = () => {
     scrollToBottom();
   }, [comments]);
 
-  // 실시간 댓글 시뮬레이션
+  // Firestore에서 게시글 가져오기
   useEffect(() => {
-    const interval = setInterval(() => {
-      const randomComments = [
-        '동감합니다!',
-        '저도 그렇게 생각해요',
-        '좋은 정보 감사합니다',
-        '완전 공감이에요',
-      ];
-      const randomAuthors = ['영화팬A', '무비러버B', '시네필C', '관객D'];
-      
-      if (Math.random() > COMMENT_PROBABILITY) {
-        setComments(prev => [...prev, {
-          id: Date.now(),
-          author: randomAuthors[Math.floor(Math.random() * randomAuthors.length)],
-          text: randomComments[Math.floor(Math.random() * randomComments.length)],
-          timestamp: new Date(),
-        }]);
+    if (!postId) return;
+
+    const fetchPost = async () => {
+      try {
+        const postRef = doc(db, 'posts', postId);
+        const postSnap = await getDoc(postRef);
+        
+        if (postSnap.exists()) {
+          setPost({
+            id: postSnap.id,
+            ...postSnap.data()
+          } as Post);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('게시글 조회 오류:', error);
+        setLoading(false);
       }
-    }, 8000);
+    };
 
-    return () => clearInterval(interval);
-  }, []);
+    fetchPost();
+  }, [postId]);
 
-  const handleSubmitComment = (e: React.FormEvent) => {
+  // Firestore 댓글 실시간 구독
+  useEffect(() => {
+    if (!postId) return;
+
+    const commentsRef = collection(db, 'comments');
+    const q = query(
+      commentsRef,
+      where('postId', '==', postId),
+      orderBy('createdAt', 'asc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const newComments: Comment[] = [];
+      snapshot.forEach((doc) => {
+        newComments.push({
+          id: doc.id,
+          ...doc.data()
+        } as Comment);
+      });
+      setComments(newComments);
+    }, (error) => {
+      console.error('댓글 구독 오류:', error);
+    });
+
+    return () => unsubscribe();
+  }, [postId]);
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newComment.trim()) {
-      setComments(prev => [...prev, {
-        id: Date.now(),
-        author: '나',
-        text: newComment,
-        timestamp: new Date(),
-      }]);
+    if (!newComment.trim() || !user || !postId) return;
+
+    setSubmitting(true);
+    try {
+      const commentsRef = collection(db, 'comments');
+      await addDoc(commentsRef, {
+        postId: postId,
+        authorId: user.uid,
+        authorName: user.displayName || '익명',
+        content: newComment.trim(),
+        createdAt: Timestamp.now(),
+      });
+
+      // 게시글 댓글 수 증가
+      const postRef = doc(db, 'posts', postId);
+      await updateDoc(postRef, {
+        commentCount: increment(1)
+      });
+
       setNewComment('');
+    } catch (error) {
+      console.error('댓글 작성 오류:', error);
+      alert('댓글 작성에 실패했습니다.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const formatTimeAgo = (date: Date) => {
+  const formatTimeAgo = (timestamp: Timestamp | null) => {
+    if (!timestamp) return '';
+    const date = timestamp.toDate();
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
     if (seconds < 60) return '방금 전';
     if (seconds < 3600) return `${Math.floor(seconds / 60)}분 전`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}시간 전`;
     return `${Math.floor(seconds / 86400)}일 전`;
   };
+
+  const isMyComment = (comment: Comment) => {
+    return user && comment.authorId === user.uid;
+  };
+
+  if (loading) {
+    return (
+      <div className={`post-detail-page ${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'}`}>
+        <div className="post-detail-container">
+          <div className="loading-post">게시글을 불러오는 중...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className={`post-detail-page ${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'}`}>
+        <div className="post-detail-container">
+          <button className="back-button" onClick={() => navigate(-1)}>
+            ← 뒤로가기
+          </button>
+          <div className="no-post">게시글을 찾을 수 없습니다.</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`post-detail-page ${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'}`}>
@@ -115,8 +175,8 @@ const PostDetailPage: React.FC = () => {
           <div className="post-detail-header">
             <h1 className="post-detail-title">{post.title}</h1>
             <div className="post-meta">
-              <span className="post-author">{post.author}</span>
-              <span className="post-time">{formatTimeAgo(post.timestamp)}</span>
+              <span className="post-author">{post.authorName}</span>
+              <span className="post-time">{formatTimeAgo(post.createdAt)}</span>
             </div>
           </div>
 
@@ -125,12 +185,7 @@ const PostDetailPage: React.FC = () => {
           </div>
 
           <div className="post-actions">
-            <button 
-              className={`like-button ${liked ? 'liked' : ''}`}
-              onClick={() => setLiked(!liked)}
-            >
-              ❤️ {liked ? post.likes + 1 : post.likes}
-            </button>
+            <span className="comment-count">💬 {comments.length}</span>
           </div>
         </div>
 
@@ -138,15 +193,19 @@ const PostDetailPage: React.FC = () => {
           <h2 className="comments-title">댓글 {comments.length}</h2>
           
           <div className="comments-list">
-            {comments.map((comment) => (
-              <div key={comment.id} className={`comment ${comment.author === '나' ? 'my-comment' : ''}`}>
-                <div className="comment-header">
-                  <span className="comment-author">{comment.author}</span>
-                  <span className="comment-time">{formatTimeAgo(comment.timestamp)}</span>
+            {comments.length === 0 ? (
+              <div className="no-comments">아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!</div>
+            ) : (
+              comments.map((comment) => (
+                <div key={comment.id} className={`comment ${isMyComment(comment) ? 'my-comment' : ''}`}>
+                  <div className="comment-header">
+                    <span className="comment-author">{comment.authorName}</span>
+                    <span className="comment-time">{formatTimeAgo(comment.createdAt)}</span>
+                  </div>
+                  <p className="comment-text">{comment.content}</p>
                 </div>
-                <p className="comment-text">{comment.text}</p>
-              </div>
-            ))}
+              ))
+            )}
             <div ref={commentsEndRef} />
           </div>
 
@@ -158,7 +217,9 @@ const PostDetailPage: React.FC = () => {
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
             />
-            <button type="submit" className="comment-submit-button">등록</button>
+            <button type="submit" className="comment-submit-button" disabled={submitting || !newComment.trim()}>
+              {submitting ? '등록 중...' : '등록'}
+            </button>
           </form>
         </div>
       </div>

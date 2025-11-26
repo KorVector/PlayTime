@@ -10,6 +10,7 @@ import StatsSection from './components/StatsSection';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import LikedModal from './components/LikedModal';
+import ProtectedRoute from './components/ProtectedRoute';
 import LiveChatRoom from './pages/LiveChatRoom';
 import ChatMainPage from './pages/ChatMainPage';
 import MovieChatListPage from './pages/MovieChatListPage';
@@ -49,13 +50,13 @@ function App() {
           
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/live-chat" element={<LiveChatRoom />} />
-            <Route path="/chat-main" element={<ChatMainPage />} />
-            <Route path="/movie-chat-list" element={<MovieChatListPage />} />
-            <Route path="/movie/:movieId/board" element={<MovieBoardPage />} />
-            <Route path="/genres" element={<GenreListPage />} />
-            <Route path="/genre/:genreId/board" element={<GenreBoardPage />} />
-            <Route path="/post/:postId" element={<PostDetailPage />} />
+            <Route path="/live-chat" element={<ProtectedRoute><LiveChatRoom /></ProtectedRoute>} />
+            <Route path="/chat-main" element={<ProtectedRoute><ChatMainPage /></ProtectedRoute>} />
+            <Route path="/movie-chat-list" element={<ProtectedRoute><MovieChatListPage /></ProtectedRoute>} />
+            <Route path="/movie/:movieId/board" element={<ProtectedRoute><MovieBoardPage /></ProtectedRoute>} />
+            <Route path="/genres" element={<ProtectedRoute><GenreListPage /></ProtectedRoute>} />
+            <Route path="/genre/:genreId/board" element={<ProtectedRoute><GenreBoardPage /></ProtectedRoute>} />
+            <Route path="/post/:postId" element={<ProtectedRoute><PostDetailPage /></ProtectedRoute>} />
           </Routes>
           
           <Footer />

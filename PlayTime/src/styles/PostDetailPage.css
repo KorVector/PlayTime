@@ -190,6 +190,27 @@
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 }
 
+.comment-submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.loading-post,
+.no-post,
+.no-comments {
+  color: #9ca3af;
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 15px;
+}
+
+.comment-count {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
 /* 태블릿 */
 @media (max-width: 1024px) {
   .post-detail {
