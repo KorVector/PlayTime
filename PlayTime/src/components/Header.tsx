@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useResponsive } from '../hooks/useResponsive';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/Header.css';
@@ -13,7 +14,14 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+
+  // Detect if current page is a chat-related page
+  const isChatPage = ['/live-chat', '/chat-main', '/movie-chat-list', '/genres'].some(
+    path => location.pathname.startsWith(path)
+  ) || location.pathname.includes('/board') || location.pathname.includes('/post/');
 
   // 프로필 이니셜 (displayName 또는 email의 첫 글자)
   const getInitial = () => {
@@ -45,6 +53,29 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
     };
   }, []);
 
+  // 채팅 페이지에서 Header 자동 숨김/표시 기능
+  useEffect(() => {
+    if (!isChatPage) {
+      setIsVisible(true);
+      return;
+    }
+
+    // 채팅 페이지에서는 기본적으로 숨김
+    setIsVisible(false);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // 마우스가 화면 상단 50px 이내에 있으면 표시
+      if (e.clientY < 50) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [isChatPage]);
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -63,7 +94,7 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   };
 
   return (
-    <header className={`header ${isMobile ? 'mobile' : 'desktop'}`}>
+    <header className={`header ${isMobile ? 'mobile' : 'desktop'} ${!isVisible ? 'hidden' : ''}`}>
       <div className="header-container">
         <div className="logo">TimePlay</div>
         
