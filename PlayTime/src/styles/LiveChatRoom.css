@@ -164,6 +164,25 @@
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 }
 
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.loading-messages,
+.no-messages {
+  color: #9ca3af;
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 15px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* 모바일 */
 @media (max-width: 640px) {
   .live-chat-room {

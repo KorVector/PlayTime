@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { collection, addDoc, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useAuth } from '../contexts/AuthContext';
 import { useResponsive } from '../hooks/useResponsive';
 import '../styles/BoardPage.css';
 
@@ -8,12 +11,14 @@ const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 
 interface Post {
-  id: number;
-  author: string;
+  id: string;
+  movieId: string;
+  authorId: string;
+  authorName: string;
   title: string;
   content: string;
-  timestamp: Date;
-  likes: number;
+  createdAt: Timestamp;
+  commentCount: number;
 }
 
 interface MovieDetail {
@@ -29,28 +34,14 @@ interface MovieDetail {
 const MovieBoardPage: React.FC = () => {
   const { movieId } = useParams<{ movieId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { isMobile, isTablet } = useResponsive();
   const [movie, setMovie] = useState<MovieDetail | null>(null);
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: 1,
-      author: '영화광123',
-      title: '이 영화 진짜 최고예요!',
-      content: '스토리도 좋고 연기도 훌륭했어요. 꼭 보세요!',
-      timestamp: new Date(Date.now() - 3600000),
-      likes: 15,
-    },
-    {
-      id: 2,
-      author: '시네마러버',
-      title: '감독의 연출력이 돋보이는 작품',
-      content: '세밀한 디테일까지 신경 쓴 게 느껴집니다.',
-      timestamp: new Date(Date.now() - 7200000),
-      likes: 8,
-    },
-  ]);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '' });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchMovieDetail = async () => {
@@ -70,23 +61,64 @@ const MovieBoardPage: React.FC = () => {
     fetchMovieDetail();
   }, [movieId]);
 
-  const handleSubmitPost = (e: React.FormEvent) => {
+  // Firestore 게시글 실시간 구독
+  useEffect(() => {
+    if (!movieId) return;
+
+    const postsRef = collection(db, 'posts');
+    const q = query(
+      postsRef,
+      where('movieId', '==', movieId),
+      orderBy('createdAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const newPosts: Post[] = [];
+      snapshot.forEach((doc) => {
+        newPosts.push({
+          id: doc.id,
+          ...doc.data()
+        } as Post);
+      });
+      setPosts(newPosts);
+      setLoading(false);
+    }, (error) => {
+      console.error('게시글 구독 오류:', error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [movieId]);
+
+  const handleSubmitPost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPost.title.trim() && newPost.content.trim()) {
-      setPosts(prev => [{
-        id: Date.now(),
-        author: '나',
-        title: newPost.title,
-        content: newPost.content,
-        timestamp: new Date(),
-        likes: 0,
-      }, ...prev]);
+    if (!newPost.title.trim() || !newPost.content.trim() || !user || !movieId) return;
+
+    setSubmitting(true);
+    try {
+      const postsRef = collection(db, 'posts');
+      await addDoc(postsRef, {
+        movieId: movieId,
+        authorId: user.uid,
+        authorName: user.displayName || '익명',
+        title: newPost.title.trim(),
+        content: newPost.content.trim(),
+        createdAt: Timestamp.now(),
+        commentCount: 0,
+      });
       setNewPost({ title: '', content: '' });
       setShowForm(false);
+    } catch (error) {
+      console.error('게시글 작성 오류:', error);
+      alert('게시글 작성에 실패했습니다.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const formatTimeAgo = (date: Date) => {
+  const formatTimeAgo = (timestamp: Timestamp | null) => {
+    if (!timestamp) return '';
+    const date = timestamp.toDate();
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
     if (seconds < 60) return '방금 전';
     if (seconds < 3600) return `${Math.floor(seconds / 60)}분 전`;
@@ -144,28 +176,36 @@ const MovieBoardPage: React.FC = () => {
                 onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
                 rows={5}
               />
-              <button type="submit" className="submit-post-button">게시하기</button>
+              <button type="submit" className="submit-post-button" disabled={submitting}>
+                {submitting ? '게시 중...' : '게시하기'}
+              </button>
             </form>
           )}
 
           <div className="posts-list">
-            {posts.map((post) => (
-              <div
-                key={post.id}
-                className="post-card"
-                onClick={() => navigate(`/post/${post.id}`)}
-              >
-                <div className="post-header">
-                  <span className="post-author">{post.author}</span>
-                  <span className="post-time">{formatTimeAgo(post.timestamp)}</span>
+            {loading ? (
+              <div className="loading-posts">게시글을 불러오는 중...</div>
+            ) : posts.length === 0 ? (
+              <div className="no-posts">아직 게시글이 없습니다. 첫 번째 글을 작성해보세요!</div>
+            ) : (
+              posts.map((post) => (
+                <div
+                  key={post.id}
+                  className="post-card"
+                  onClick={() => navigate(`/post/${post.id}`)}
+                >
+                  <div className="post-header">
+                    <span className="post-author">{post.authorName}</span>
+                    <span className="post-time">{formatTimeAgo(post.createdAt)}</span>
+                  </div>
+                  <h3 className="post-title">{post.title}</h3>
+                  <p className="post-preview">{post.content}</p>
+                  <div className="post-footer">
+                    <span className="post-likes">💬 {post.commentCount}</span>
+                  </div>
                 </div>
-                <h3 className="post-title">{post.title}</h3>
-                <p className="post-preview">{post.content}</p>
-                <div className="post-footer">
-                  <span className="post-likes">❤️ {post.likes}</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
