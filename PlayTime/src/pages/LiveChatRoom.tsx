@@ -18,6 +18,9 @@ const LiveChatRoom: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [onlineCount, setOnlineCount] = useState(42);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const MESSAGE_PROBABILITY = 0.7;
+  const MIN_ONLINE_COUNT = 1;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -38,14 +41,14 @@ const LiveChatRoom: React.FC = () => {
       ];
       const randomUsernames = ['영화팬', '무비러버', '시네필', '드라마킹'];
       
-      if (Math.random() > 0.7) {
+      if (Math.random() > MESSAGE_PROBABILITY) {
         setMessages(prev => [...prev, {
           id: Date.now(),
           username: randomUsernames[Math.floor(Math.random() * randomUsernames.length)],
           text: randomMessages[Math.floor(Math.random() * randomMessages.length)],
           timestamp: new Date(),
         }]);
-        setOnlineCount(prev => prev + Math.floor(Math.random() * 3 - 1));
+        setOnlineCount(prev => Math.max(MIN_ONLINE_COUNT, prev + Math.floor(Math.random() * 3 - 1)));
       }
     }, 5000);
 

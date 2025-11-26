@@ -95,9 +95,10 @@ const MovieCard: React.FC<MovieCardProps> = ({
   };
 
   const handleChatClick = () => {
-    if (onChatClick) {
-      onChatClick();
-    }
+    // Call callback if provided
+    onChatClick?.();
+    
+    // Navigate if id is present
     if (id) {
       navigate(`/movie/${id}/board`);
     }

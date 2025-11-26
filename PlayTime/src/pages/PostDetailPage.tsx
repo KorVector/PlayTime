@@ -48,6 +48,8 @@ const PostDetailPage: React.FC = () => {
   const [newComment, setNewComment] = useState('');
   const [liked, setLiked] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
+  
+  const COMMENT_PROBABILITY = 0.8;
 
   const scrollToBottom = () => {
     commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -68,7 +70,7 @@ const PostDetailPage: React.FC = () => {
       ];
       const randomAuthors = ['영화팬A', '무비러버B', '시네필C', '관객D'];
       
-      if (Math.random() > 0.8) {
+      if (Math.random() > COMMENT_PROBABILITY) {
         setComments(prev => [...prev, {
           id: Date.now(),
           author: randomAuthors[Math.floor(Math.random() * randomAuthors.length)],
