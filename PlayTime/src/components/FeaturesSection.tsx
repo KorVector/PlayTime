@@ -147,11 +147,13 @@ export default FeaturesSection;
 // export default FeaturesSection;
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useResponsive } from '../hooks/useResponsive';
 import FeatureCard from './FeatureCard';
 import '../styles/FeaturesSection.css';
 
 const FeaturesSection: React.FC = () => {
+  const navigate = useNavigate();
   const { isMobile, isTablet } = useResponsive();
 
   const features = [
@@ -175,6 +177,16 @@ const FeaturesSection: React.FC = () => {
     },
   ];
 
+  const handleFeatureClick = (id: number) => {
+    if (id === 1) {
+      navigate('/live-chat');
+    } else if (id === 2) {
+      navigate('/chat-main');
+    } else {
+      console.log(`Feature ${id} clicked`);
+    }
+  };
+
   const boxWidth = isMobile ? 'calc(100% - 40px)' : isTablet ? 'calc(100% - 60px)' : 1647;
   const boxHeight = isMobile ? 'auto' : isTablet ? 'auto' : 734;
   const pointBoxWidth = isMobile ? '90%' : isTablet ? '80%' : 367;
@@ -189,7 +201,7 @@ const FeaturesSection: React.FC = () => {
             title={feature.title}
             description={feature.description}
             buttonText={feature.buttonText}
-            onButtonClick={() => console.log(`${feature.title} 클릭`)}
+            onButtonClick={() => handleFeatureClick(feature.id)}
           />
         ))}
       </div>

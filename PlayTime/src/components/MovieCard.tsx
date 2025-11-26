@@ -57,10 +57,12 @@
 // export default MovieCard;
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/MovieCard.css';
 import HeartIcon from './HeartIcon';
 
 interface MovieCardProps {
+  id?: number;
   image?: string;
   title: string;
   date: string;
@@ -72,6 +74,7 @@ interface MovieCardProps {
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({
+  id,
   image = 'https://placehold.co/309x450',
   title,
   date,
@@ -81,6 +84,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
   onLikeClick,
   isLiked: initialLiked = false,
 }) => {
+  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(initialLiked);
 
   const handleLikeClick = () => {
@@ -88,6 +92,15 @@ const MovieCard: React.FC<MovieCardProps> = ({
     setIsLiked(newLikedState);
     // 부모 컴포넌트에도 알림 (콜백 제공된 경우)
     onLikeClick?.(newLikedState);
+  };
+
+  const handleChatClick = () => {
+    if (onChatClick) {
+      onChatClick();
+    }
+    if (id) {
+      navigate(`/movie/${id}/board`);
+    }
   };
 
   return (
@@ -120,7 +133,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
         </div>
 
         <div className="actions-right">
-          <button className="chat-button chat-near-heart" onClick={onChatClick}>
+          <button className="chat-button chat-near-heart" onClick={handleChatClick}>
             채팅방 바로가기
           </button>
 

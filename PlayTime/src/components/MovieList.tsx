@@ -107,6 +107,7 @@ export default function MovieList() {
       {displayed.map((m) => (
         <div key={m.id} style={{ flex: '0 0 auto' }}>
           <MovieCard
+            id={m.id}
             image={m.poster_path ? `${IMAGE_BASE}${m.poster_path}` : undefined}
             title={m.title}
             date={m.release_date || ''}

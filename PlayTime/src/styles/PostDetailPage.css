@@ -1,0 +1,253 @@
+.post-detail-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #121419 0%, #1a1d26 100%);
+  padding: 60px 20px;
+}
+
+.post-detail-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.post-detail {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 17px;
+  padding: 40px;
+  margin-bottom: 30px;
+}
+
+.post-detail-header {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.post-detail-title {
+  color: white;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.post-author {
+  color: #9ca3af;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.post-time {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.post-detail-content {
+  color: #e5e7eb;
+  font-size: 16px;
+  line-height: 1.8;
+  margin-bottom: 30px;
+}
+
+.post-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.like-button {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.like-button:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: scale(1.05);
+}
+
+.like-button.liked {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.comments-section {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 17px;
+  padding: 30px;
+}
+
+.comments-title {
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.comment {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.comment.my-comment {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.comment-time {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.comment-text {
+  color: #e5e7eb;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.comment-form {
+  display: flex;
+  gap: 12px;
+}
+
+.comment-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: white;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.comment-input:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+.comment-input::placeholder {
+  color: #6b7280;
+}
+
+.comment-submit-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.comment-submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* 태블릿 */
+@media (max-width: 1024px) {
+  .post-detail {
+    padding: 32px;
+  }
+
+  .post-detail-title {
+    font-size: 28px;
+  }
+
+  .post-detail-content {
+    font-size: 15px;
+  }
+
+  .comments-section {
+    padding: 24px;
+  }
+}
+
+/* 모바일 */
+@media (max-width: 640px) {
+  .post-detail-page {
+    padding: 40px 15px;
+  }
+
+  .post-detail {
+    padding: 24px;
+  }
+
+  .post-detail-title {
+    font-size: 24px;
+  }
+
+  .post-detail-content {
+    font-size: 14px;
+  }
+
+  .comments-section {
+    padding: 20px;
+  }
+
+  .comments-title {
+    font-size: 18px;
+  }
+
+  .comments-list {
+    max-height: 400px;
+  }
+
+  .comment {
+    padding: 14px;
+  }
+
+  .comment-form {
+    flex-direction: column;
+  }
+
+  .comment-submit-button {
+    width: 100%;
+  }
+}
