@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { collection, addDoc, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useResponsive } from '../hooks/useResponsive';
@@ -31,6 +31,10 @@ interface MovieDetail {
   release_date: string;
 }
 
+interface FirestoreError extends Error {
+  code?: string;
+}
+
 const MovieBoardPage: React.FC = () => {
   const { movieId } = useParams<{ movieId: string }>();
   const navigate = useNavigate();
@@ -39,6 +43,7 @@ const MovieBoardPage: React.FC = () => {
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -65,11 +70,12 @@ const MovieBoardPage: React.FC = () => {
   useEffect(() => {
     if (!movieId) return;
 
+    setError(null);
     const postsRef = collection(db, 'posts');
+    // 인덱스 없이도 작동하도록 클라이언트에서 정렬
     const q = query(
       postsRef,
-      where('movieId', '==', movieId),
-      orderBy('createdAt', 'desc')
+      where('movieId', '==', movieId)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -80,10 +86,21 @@ const MovieBoardPage: React.FC = () => {
           ...doc.data()
         } as Post);
       });
+      // 클라이언트에서 createdAt 기준 내림차순 정렬
+      newPosts.sort((a, b) => {
+        const aTime = a.createdAt?.toMillis?.() ?? 0;
+        const bTime = b.createdAt?.toMillis?.() ?? 0;
+        return bTime - aTime;
+      });
       setPosts(newPosts);
       setLoading(false);
-    }, (error) => {
+    }, (error: FirestoreError) => {
       console.error('게시글 구독 오류:', error);
+      if (error.code === 'failed-precondition') {
+        setError('데이터베이스 설정이 필요합니다. 관리자에게 문의해주세요.');
+      } else {
+        setError('게시글을 불러오는데 실패했습니다.');
+      }
       setLoading(false);
     });
 
@@ -92,7 +109,21 @@ const MovieBoardPage: React.FC = () => {
 
   const handleSubmitPost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPost.title.trim() || !newPost.content.trim() || !user || !movieId) return;
+    
+    // 유효성 검사
+    if (!newPost.title.trim()) {
+      alert('제목을 입력해주세요.');
+      return;
+    }
+    if (!newPost.content.trim()) {
+      alert('내용을 입력해주세요.');
+      return;
+    }
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+    if (!movieId) return;
 
     setSubmitting(true);
     try {
@@ -100,7 +131,7 @@ const MovieBoardPage: React.FC = () => {
       await addDoc(postsRef, {
         movieId: movieId,
         authorId: user.uid,
-        authorName: user.displayName || '익명',
+        authorName: user.displayName || user.email?.split('@')[0] || '익명',
         title: newPost.title.trim(),
         content: newPost.content.trim(),
         createdAt: Timestamp.now(),
@@ -108,9 +139,14 @@ const MovieBoardPage: React.FC = () => {
       });
       setNewPost({ title: '', content: '' });
       setShowForm(false);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('게시글 작성 오류:', error);
-      alert('게시글 작성에 실패했습니다.');
+      const firestoreError = error as FirestoreError;
+      if (firestoreError.code === 'permission-denied') {
+        alert('게시글 작성 권한이 없습니다. 다시 로그인해주세요.');
+      } else {
+        alert('게시글 작성에 실패했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -185,6 +221,8 @@ const MovieBoardPage: React.FC = () => {
           <div className="posts-list">
             {loading ? (
               <div className="loading-posts">게시글을 불러오는 중...</div>
+            ) : error ? (
+              <div className="error-posts">{error}</div>
             ) : posts.length === 0 ? (
               <div className="no-posts">아직 게시글이 없습니다. 첫 번째 글을 작성해보세요!</div>
             ) : (

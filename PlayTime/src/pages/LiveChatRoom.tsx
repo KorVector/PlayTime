@@ -5,6 +5,10 @@ import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/LiveChatRoom.css';
 
+interface FirestoreError extends Error {
+  code?: string;
+}
+
 interface Message {
   id: string;
   userId: string;
@@ -20,6 +24,7 @@ const LiveChatRoom: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -32,6 +37,7 @@ const LiveChatRoom: React.FC = () => {
 
   // Firebase Firestore 실시간 메시지 구독
   useEffect(() => {
+    setError(null);
     const messagesRef = collection(db, 'chatMessages');
     const q = query(messagesRef, orderBy('timestamp', 'asc'), limit(100));
 
@@ -45,8 +51,13 @@ const LiveChatRoom: React.FC = () => {
       });
       setMessages(newMessages);
       setLoading(false);
-    }, (error) => {
+    }, (error: FirestoreError) => {
       console.error('메시지 구독 오류:', error);
+      if (error.code === 'failed-precondition') {
+        setError('데이터베이스 설정이 필요합니다. 관리자에게 문의해주세요.');
+      } else {
+        setError('메시지를 불러오는데 실패했습니다.');
+      }
       setLoading(false);
     });
 
@@ -55,21 +66,33 @@ const LiveChatRoom: React.FC = () => {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !user) return;
+    
+    if (!newMessage.trim()) {
+      return;
+    }
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
 
     try {
       const messagesRef = collection(db, 'chatMessages');
       await addDoc(messagesRef, {
         userId: user.uid,
-        userName: user.displayName || '익명',
+        userName: user.displayName || user.email?.split('@')[0] || '익명',
         userEmail: user.email || '',
         message: newMessage.trim(),
         timestamp: Timestamp.now(),
       });
       setNewMessage('');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('메시지 전송 오류:', error);
-      alert('메시지 전송에 실패했습니다.');
+      const firestoreError = error as FirestoreError;
+      if (firestoreError.code === 'permission-denied') {
+        alert('메시지 전송 권한이 없습니다. 다시 로그인해주세요.');
+      } else {
+        alert('메시지 전송에 실패했습니다. 다시 시도해주세요.');
+      }
     }
   };
 
@@ -100,6 +123,8 @@ const LiveChatRoom: React.FC = () => {
         <div className="messages-container">
           {loading ? (
             <div className="loading-messages">메시지를 불러오는 중...</div>
+          ) : error ? (
+            <div className="error-messages">{error}</div>
           ) : messages.length === 0 ? (
             <div className="no-messages">아직 메시지가 없습니다. 첫 번째 메시지를 보내보세요!</div>
           ) : (
