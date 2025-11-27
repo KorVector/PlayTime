@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useResponsive } from '../hooks/useResponsive';
 import MovieCard from './MovieCard';
 import '../styles/MovieCarousel.css';
@@ -19,24 +19,63 @@ interface MovieCarouselProps {
 
 const MovieCarousel: React.FC<MovieCarouselProps> = ({ movies = [], title, children }) => {
   const { isMobile, isTablet } = useResponsive();
-  
-  // 화면 크기에 따라 표시할 영화 수 제한
-  const displayCount = isMobile ? 2 : isTablet ? 3 : 4;
-  const displayedMovies = movies.slice(0, displayCount);
+  const [isPaused, setIsPaused] = useState(false);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  // 무한 순환을 위해 영화 목록을 3번 복제
+  const duplicatedMovies = [...movies, ...movies, ...movies];
+
+  // children을 3번 복제
+  const childArray = React.Children.toArray(children);
+  const duplicatedChildren = [...childArray, ...childArray, ...childArray];
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || isPaused) return;
+
+    let animationId: number;
+    let position = 0;
+    const speed = 0.5; // 속도 조절 (낮을수록 느림)
+
+    const animate = () => {
+      position -= speed;
+      const singleSetWidth = track.scrollWidth / 3;
+      
+      // 첫 번째 세트가 완전히 지나가면 위치 리셋
+      if (Math.abs(position) >= singleSetWidth) {
+        position = 0;
+      }
+      
+      track.style.transform = `translateX(${position}px)`;
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [isPaused, movies.length, childArray.length]);
 
   return (
     <section className={`movie-carousel ${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'}`}>
       <h2 className="carousel-title">{title}</h2>
-      <div className="carousel-container">
+      <div 
+        className="carousel-container"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
         {children ? (
-          <div className={`movies-grid grid-${displayCount}`}>
-            {children}
+          <div className="movies-track" ref={trackRef}>
+            {duplicatedChildren.map((child, index) => (
+              <React.Fragment key={index}>{child}</React.Fragment>
+            ))}
           </div>
         ) : (
-          <div className={`movies-grid grid-${displayCount}`}>
-            {displayedMovies.map((movie) => (
+          <div className="movies-track" ref={trackRef}>
+            {duplicatedMovies.map((movie, index) => (
               <MovieCard
-                key={movie.id}
+                key={`${movie.id}-${index}`}
                 title={movie.title}
                 date={movie.date}
                 rating={movie.rating}

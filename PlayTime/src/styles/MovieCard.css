@@ -3,13 +3,13 @@
   flex-direction: column;
   width: 220px;
   height: 395px;
-  background: transparent;
-  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 20px;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.2s ease, border 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   flex-shrink: 0;
-  box-shadow: 0 10px 30px rgba(8, 15, 30, 0.35);
-  border: 2px solid rgba(255,255,255,0.04);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(139, 92, 246, 0.1);
   position: relative;
 }
 
@@ -20,15 +20,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 17px;
+  border-radius: 20px;
   padding: 2px;
-  background: linear-gradient(
-    135deg,
-    #a78bfa 0%,
-    #60a5fa 35%,
-    #34d399 65%,
-    #fbbf24 100%
-  );
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -120,7 +114,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(167, 139, 250, 0.4) 0%, rgba(96, 165, 250, 0.3) 100%);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(59, 130, 246, 0.3) 100%);
   border-radius: 50%;
   z-index: -1;
   opacity: 1;
@@ -130,7 +124,7 @@
   content: '';
   position: absolute;
   inset: 0.5px;
-  background: rgba(10, 10, 20, 0.4);
+  background: rgba(10, 10, 20, 0.5);
   border-radius: 50%;
   z-index: -1;
   backdrop-filter: blur(8px);
@@ -221,8 +215,9 @@
 }
 
 .movie-card:hover {
-  transform: translateY(-10px) scale(1.05);
-  border-color: rgba(255,255,255,0.04);
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 16px 48px rgba(139, 92, 246, 0.2);
 }
 
 .movie-card:hover .movie-overlay {
@@ -231,7 +226,6 @@
 
 .movie-card:hover::before {
   opacity: 1;
-  box-shadow: 0 0 12px rgba(0, 255, 47, 0.4);
 }
 
 /* 데스크톱 (1025px 이상) */

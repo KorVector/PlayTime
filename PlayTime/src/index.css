@@ -14,13 +14,26 @@
   font-weight: 400;
 
   color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #000000;
+  color: rgba(255, 255, 255, 0.92);
+  background: #0a0a14;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* PlayTime 색상 변수 - 보라-청색 테마 */
+  --bg-primary: #0a0a14;
+  --bg-secondary: #0f0f1a;
+  --bg-card: rgba(255, 255, 255, 0.02);
+  --accent-purple: #8b5cf6;
+  --accent-blue: #3b82f6;
+  --accent-indigo: #6366f1;
+  --gradient-main: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
+  --gradient-subtle: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+  --text-primary: rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --border-subtle: rgba(139, 92, 246, 0.1);
   
   /* 반응형 설정 */
   --mobile-breakpoint: 640px;
@@ -34,14 +47,14 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #000000;
+  background: #0a0a14;
   overflow-x: hidden;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
-  background-color: #000000;
+  background: #0a0a14;
 }
 
 body {
@@ -57,16 +70,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(139, 92, 246, 0.05);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(180deg, #8b5cf6 0%, #3b82f6 100%);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: linear-gradient(180deg, #7c3aed 0%, #2563eb 100%);
 }
 
 /* 모바일 기본 스타일 최적화 */

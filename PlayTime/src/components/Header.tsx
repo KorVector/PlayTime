@@ -96,7 +96,9 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   return (
     <header className={`header ${isMobile ? 'mobile' : 'desktop'} ${!isVisible ? 'hidden' : ''}`}>
       <div className="header-container">
-        <div className="logo">TimePlay</div>
+        <div className="logo">
+          <span className="logo-gradient">PlayTime</span>
+        </div>
         
         {isMobile && (
           <button 

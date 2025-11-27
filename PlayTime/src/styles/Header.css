@@ -8,9 +8,11 @@
   left: 0;
   right: 0;
   width: 100%;
-  height: 88px; /* reduced height */
-  background-color: black;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  height: 80px;
+  background: rgba(10, 10, 20, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -26,7 +28,7 @@
   width: 100%;
   max-width: 1920px;
   margin: 0 auto;
-  padding: 0 24px; /* reduced left/right padding to move logo left */
+  padding: 0 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -34,9 +36,9 @@
 }
 
 .logo {
-  font-size: 28px; /* smaller */
+  font-size: 26px;
   font-family: 'DM Sans', sans-serif;
-  font-weight: 800; /* keep logo bold */
+  font-weight: 800;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
@@ -52,7 +54,7 @@
   width: 36px;
   height: 36px;
   margin-right: 6px;
-  line-height: 0; /* prevent font baseline offset */
+  line-height: 0;
 }
 
 .logo-mark svg {
@@ -83,30 +85,27 @@
 }
 
 .logo-gradient {
-  /* Stronger, wider gradient sweep while keeping same cyan->green family */
-  background-image: linear-gradient(90deg, #007ea7 0%, #00a8c7 30%, #00c9df 55%, #36f08b 80%, #00ff2f 100%);
-  background-size: 400% 100%;
+  /* 보라-청색 그라디언트 */
+  background-image: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
+  background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: logoGradient 3s ease-in-out infinite;
-  font-weight: 800; /* keep logo bold */
-  font-size: 28px; /* match reduced header */
+  font-weight: 800;
+  font-size: 26px;
   transition: transform 0.18s ease, filter 0.18s ease;
-  /* subtle glow to make color shifts more perceptible */
-  filter: drop-shadow(0 6px 12px rgba(0, 201, 223, 0.10)) drop-shadow(0 4px 10px rgba(0, 255, 47, 0.06));
+  filter: drop-shadow(0 4px 12px rgba(139, 92, 246, 0.25));
 }
 
 .logo:hover .logo-gradient {
-  transform: translateY(-3px) scale(1.02);
-  filter: drop-shadow(0 10px 22px rgba(0, 201, 223, 0.16)) drop-shadow(0 6px 14px rgba(0, 255, 47, 0.08));
+  transform: translateY(-2px) scale(1.02);
+  filter: drop-shadow(0 8px 20px rgba(139, 92, 246, 0.35));
 }
 
 @keyframes logoGradient {
   0% { background-position: 0% 50%; }
-  25% { background-position: 50% 50%; }
   50% { background-position: 100% 50%; }
-  75% { background-position: 50% 50%; }
   100% { background-position: 0% 50%; }
 }
 
@@ -114,7 +113,7 @@
   display: none;
   background: none;
   border: none;
-  color: white;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 28px;
   cursor: pointer;
   padding: 0;
@@ -127,7 +126,7 @@
 
 .nav-menu {
   display: flex;
-  gap: 28px; /* slightly tighter */
+  gap: 32px;
   align-items: center;
   transition: all 0.22s ease;
 }
@@ -135,23 +134,24 @@
 .nav-item {
   background: none;
   border: none;
-  color: white;
-  font-size: 16px; /* reduced */
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 15px;
   font-family: 'DM Sans', sans-serif;
-  font-weight: 400; /* thinner */
+  font-weight: 500;
   cursor: pointer;
   padding: 0;
-  transition: opacity 0.22s ease, transform 0.18s ease;
+  transition: color 0.22s ease, transform 0.18s ease;
   white-space: nowrap;
 }
 
 .nav-item:hover {
-  opacity: 0.8;
+  color: #8b5cf6;
 }
 
 .login-btn {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
+  color: #8b5cf6;
 }
 
 /* 프로필 컨테이너 */
@@ -166,16 +166,18 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: linear-gradient(90deg, #00c9df, #00ff2f);
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
   border: none;
   border-radius: 25px;
-  padding: 8px 16px;
+  padding: 8px 18px;
   cursor: pointer;
-  transition: opacity 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
 }
 
 .profile-btn:hover {
-  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
 }
 
 /* 프로필 이미지 */
@@ -219,11 +221,13 @@
   top: 100%;
   right: 0;
   margin-top: 8px;
-  background-color: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  background: rgba(15, 15, 26, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  border-radius: 16px;
   min-width: 200px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   z-index: 1001;
   overflow: hidden;
 }
@@ -231,11 +235,11 @@
 /* 프로필 정보 */
 .profile-info {
   padding: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
 }
 
 .profile-email {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 14px;
   font-family: 'DM Sans', sans-serif;
   word-break: break-all;
@@ -247,48 +251,58 @@
   padding: 14px 16px;
   background: none;
   border: none;
-  color: white;
+  color: rgba(255, 255, 255, 0.85);
   font-size: 14px;
   font-family: 'DM Sans', sans-serif;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .dropdown-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
 }
 
 .logout-btn {
-  color: #ff6b6b;
+  color: #f43f5e;
+}
+
+.logout-btn:hover {
+  background: rgba(244, 63, 94, 0.1);
+  color: #f43f5e;
 }
 
 /* 태블릿 (641px - 1024px) */
 @media (max-width: 1024px) and (min-width: 641px) {
   .header {
-    height: 72px; /* compact for tablet */
+    height: 70px;
   }
 
   .header-container {
-    padding: 0 28px;
+    padding: 0 24px;
   }
 
   .logo {
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .logo-gradient {
+    font-size: 22px;
   }
 
   .logo-mark { width: 30px; height: 30px; }
 
   .nav-menu {
-    gap: 22px;
+    gap: 24px;
   }
 
   .nav-item {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .profile-btn {
-    padding: 6px 10px;
+    padding: 6px 14px;
     gap: 8px;
   }
 
@@ -311,7 +325,7 @@
 /* 모바일 (max-width: 640px) */
 @media (max-width: 640px) {
   .header {
-    height: 64px; /* compact mobile header */
+    height: 64px;
   }
 
   .header-container {
@@ -319,6 +333,10 @@
   }
 
   .logo {
+    font-size: 20px;
+  }
+
+  .logo-gradient {
     font-size: 20px;
   }
 
@@ -330,14 +348,16 @@
 
   .nav-menu {
     position: fixed;
-    top: 64px; /* align with reduced header */
+    top: 64px;
     left: 0;
     right: 0;
-    background-color: rgba(0, 0, 0, 0.95);
+    background: rgba(10, 10, 20, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     flex-direction: column;
     gap: 12px;
-    padding: 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 16px;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.1);
     transform: translateX(-100%);
     transition: transform 0.22s ease;
     z-index: 999;
@@ -350,8 +370,8 @@
   }
 
   .nav-item {
-    font-size: 13px;
-    padding: 8px 0;
+    font-size: 14px;
+    padding: 10px 0;
   }
 
   .profile-container {
@@ -363,7 +383,7 @@
   .profile-btn {
     width: 100%;
     justify-content: flex-start;
-    padding: 8px 12px;
+    padding: 10px 14px;
   }
 
   .profile-dropdown {
@@ -387,6 +407,10 @@
     font-size: 18px;
   }
 
+  .logo-gradient {
+    font-size: 18px;
+  }
+
   .logo-mark { width: 24px; height: 24px; }
 
   .menu-toggle {
@@ -395,11 +419,11 @@
 
   .nav-menu {
     top: 60px;
-    padding: 12px;
+    padding: 14px;
     gap: 10px;
   }
 
   .nav-item {
-    font-size: 12px;
+    font-size: 13px;
   }
 }

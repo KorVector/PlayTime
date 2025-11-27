@@ -5,10 +5,10 @@
 .hero-section {
   position: relative;
   width: 100%;
-  height: 855px;
-  background-color: white;
-  overflow: hidden;
-  margin-top: 88px; /* match reduced header height */
+  height: 800px;
+  background: linear-gradient(180deg, #0a0a14 0%, #0f0f1a 100%);
+  overflow: visible;
+  margin-top: 80px;
 }
 
 .hero-image {
@@ -16,6 +16,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 0.6;
 }
 
 .hero-overlay {
@@ -24,7 +25,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, black 100%);
+  background: linear-gradient(180deg, rgba(10, 10, 20, 0.3) 0%, rgba(10, 10, 20, 0.7) 50%, #0a0a14 100%);
   z-index: 1;
 }
 
@@ -39,78 +40,80 @@
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
-  padding-bottom: 80px;
+  padding-bottom: 100px;
   z-index: 2;
   padding: 20px;
+  padding-bottom: 60px;
   box-sizing: border-box;
 }
 
 .hero-subtitle {
-  width: 935px;
-  opacity: 0.7;
+  width: 800px;
   text-align: center;
-  color: white;
+  color: rgba(255, 255, 255, 0.75);
   font-size: 20px;
   font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
-  line-height: 35px;
-  margin: 0 auto 30px;
+  font-weight: 400;
+  line-height: 32px;
+  margin: 0 auto 35px;
 }
 
 .hero-btn {
-  width: 367px;
-  height: 64px;
-  background: rgba(39.31, 39.31, 39.31, 0.3);
+  width: 280px;
+  height: 56px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
   border: none;
-  border-radius: 50px;
+  border-radius: 28px;
   color: white;
-  font-size: 20px;
+  font-size: 16px;
   font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.35);
+  margin-bottom: 20px;
 }
 
 .hero-btn:hover {
-  opacity: 1;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.5);
 }
 
 /* 태블릿 (641px - 1024px) */
 @media (max-width: 1024px) and (min-width: 641px) {
   .hero-section {
-    height: 600px;
-    margin-top: 72px; /* tablet header height */
+    height: 550px;
+    margin-top: 70px;
   }
 
   .hero-content {
-    padding-bottom: 60px;
+    padding-bottom: 70px;
   }
 
   .hero-subtitle {
-    width: 80%;
-    font-size: 18px;
-    line-height: 30px;
-    margin-bottom: 25px;
+    width: 85%;
+    font-size: 17px;
+    line-height: 28px;
+    margin-bottom: 30px;
   }
 
   .hero-btn {
-    width: 300px;
-    height: 56px;
-    font-size: 18px;
+    width: 240px;
+    height: 50px;
+    font-size: 15px;
   }
 }
 
 /* 모바일 (max-width: 640px) */
 @media (max-width: 640px) {
   .hero-section {
-    height: 400px;
-    margin-top: 64px; /* mobile header height */
+    height: 420px;
+    margin-top: 64px;
   }
 
   .hero-content {
-    padding-bottom: 40px;
+    padding-bottom: 50px;
     padding: 20px;
   }
 
@@ -122,7 +125,7 @@
     width: 95%;
     font-size: 14px;
     line-height: 24px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     max-width: 100%;
   }
 
@@ -132,33 +135,33 @@
   }
 
   .hero-btn {
-    width: 90%;
-    max-width: 250px;
-    height: 48px;
+    width: 200px;
+    height: 46px;
     font-size: 14px;
+    border-radius: 23px;
   }
 }
 
 /* 초소형 모바일 (max-width: 360px) */
 @media (max-width: 360px) {
   .hero-section {
-    height: 350px;
-    margin-top: 60px; /* xsmall header height */
+    height: 380px;
+    margin-top: 60px;
   }
 
   .hero-content {
-    padding-bottom: 30px;
+    padding-bottom: 40px;
   }
 
   .hero-subtitle {
     font-size: 13px;
     line-height: 22px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
   }
 
   .hero-btn {
-    width: 85%;
-    height: 44px;
-    font-size: 12px;
+    width: 180px;
+    height: 42px;
+    font-size: 13px;
   }
 }

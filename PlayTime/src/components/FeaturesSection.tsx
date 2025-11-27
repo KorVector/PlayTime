@@ -160,20 +160,23 @@ const FeaturesSection: React.FC = () => {
     {
       id: 1,
       title: '사용자 채팅방',
-      description: '유저들간의 24시간 영화 감상 채팅 서비스를 제공',
+      description: '24시간 영화 감상 채팅 서비스 제공',
       buttonText: '바로가기',
+      emoji: '💬',
     },
     {
       id: 2,
       title: '소통 커뮤니티',
       description: '영화 감상평을 남길 수 있는 커뮤니티를 제공',
       buttonText: '바로가기',
+      emoji: '💜',
     },
     {
       id: 3,
       title: '영화 시청 시간 타이머',
       description: '시청한 영화 시간을 체크하고 순위를 제공',
       buttonText: '바로가기',
+      emoji: '🕓',
     },
   ];
 
@@ -187,11 +190,6 @@ const FeaturesSection: React.FC = () => {
     }
   };
 
-  const boxWidth = isMobile ? 'calc(100% - 40px)' : isTablet ? 'calc(100% - 60px)' : 1647;
-  const boxHeight = isMobile ? 'auto' : isTablet ? 'auto' : 734;
-  const pointBoxWidth = isMobile ? '90%' : isTablet ? '80%' : 367;
-  const pointBoxHeight = isMobile ? 52 : isTablet ? 58 : 64;
-
   return (
     <section className={`features-section ${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'}`}>
       <div className="features-grid">
@@ -201,39 +199,11 @@ const FeaturesSection: React.FC = () => {
             title={feature.title}
             description={feature.description}
             buttonText={feature.buttonText}
+            emoji={feature.emoji}
             onButtonClick={() => handleFeatureClick(feature.id)}
           />
         ))}
       </div>
-
-      <div className="features-divider"></div>
-
-      {/* Movie Point 반투명 박스 */}
-      <div
-        className="movie-point-box"
-        style={{
-          width: pointBoxWidth,
-          height: pointBoxHeight,
-        }}
-      >
-        <span className="movie-point-text">
-          Movie Point
-        </span>
-      </div>
-
-      {/* 문장 */}
-      <p className="features-tagline">
-        단순 영화 추천을 넘어 다양한 사람들과 시청한 영화를 추천하고 추천받을 수 있는 서비스
-      </p>
-
-      {/* 배경 박스 */}
-      <div
-        className="features-bg-box"
-        style={{
-          width: boxWidth,
-          minHeight: boxHeight,
-        }}
-      />
     </section>
   );
 };

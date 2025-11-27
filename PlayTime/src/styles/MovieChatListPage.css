@@ -1,6 +1,6 @@
 .movie-chat-list-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #121419 0%, #1a1d26 100%);
+  background: #0a0a14;
   padding: 60px 20px;
 }
 
@@ -10,36 +10,39 @@
 }
 
 .page-title {
-  color: white;
-  font-size: 48px;
+  font-size: 42px;
   font-weight: 700;
   text-align: center;
   margin-bottom: 16px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .page-description {
-  color: #9ca3af;
-  font-size: 18px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 17px;
   text-align: center;
   margin-bottom: 60px;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .loading-text,
 .error-text,
 .no-data-text {
-  color: white;
+  color: rgba(255, 255, 255, 0.7);
   text-align: center;
   font-size: 16px;
   padding: 40px;
 }
 
 .error-text {
-  color: #f87171;
+  color: #f43f5e;
 }
 
 .no-data-text {
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .movie-grid {

@@ -6,43 +6,48 @@
 .movie-carousel {
   position: relative;
   width: 100%;
-  padding: 80px 0;
-  background-color: black;
-  overflow: hidden;
+  padding: 100px 0;
+  background: linear-gradient(180deg, #0a0a14 0%, #0f0f1a 50%, #0a0a14 100%);
+  overflow: visible;
 }
 
 .carousel-title {
   text-align: center;
-  font-size: 35px;
+  font-size: 32px;
   font-family: 'DM Sans', sans-serif;
   font-weight: 700;
   margin: 0 0 60px;
-  background: linear-gradient(
-    90deg,
-    #ff2df7 25%,
-    #00c9df 50%,
-    #00ff2f 65%
-  );
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 20px rgba(139, 92, 246, 0.2));
 }
 
 .carousel-container {
   width: 100%;
-  max-width: 1800px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .movies-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 24px;
   padding: 24px 20px;
-  align-items: center;
-  justify-items: center;
+  overflow: visible;
+  justify-content: center;
+}
+
+.movies-track {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 24px;
+  padding: 24px 0;
+  will-change: transform;
 }
 
 .movies-grid::-webkit-scrollbar {
@@ -50,38 +55,38 @@
 }
 
 .movies-grid::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(139, 92, 246, 0.05);
   border-radius: 10px;
 }
 
 .movies-grid::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18);
+  background: linear-gradient(90deg, #8b5cf6, #3b82f6);
   border-radius: 10px;
 }
 
 .movies-grid::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.26);
+  background: linear-gradient(90deg, #7c3aed, #2563eb);
 }
 
 .carousel-controls {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 20px 40px 0;
+  padding: 30px 40px 0;
 }
 
 .more-info {
-  color: white;
-  font-size: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
   font-family: 'DM Sans', sans-serif;
   font-weight: 500;
   margin: 0;
   cursor: pointer;
-  transition: opacity 0.3s ease;
+  transition: color 0.3s ease;
 }
 
 .more-info:hover {
-  opacity: 0.8;
+  color: #8b5cf6;
 }
 
 /* 태블릿 (641px - 1024px) */
@@ -102,7 +107,6 @@
   .movies-grid {
     gap: 12px;
     padding: 20px 15px;
-    justify-content: center;
   }
 
   .carousel-controls {
@@ -130,7 +134,6 @@
   }
 
   .movies-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 8px;
     padding: 16px 10px;
   }
@@ -160,7 +163,6 @@
   }
 
   .movies-grid {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 4px;
     padding: 15px 8px;
   }
