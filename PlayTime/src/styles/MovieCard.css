@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   width: 220px;
-  height: 392px;
+  height: 395px;
   background: transparent;
   border-radius: 17px;
   overflow: hidden;
@@ -66,7 +66,7 @@
 }
 
 .movie-title {
-  margin: 2px 0 8px 0;
+  margin: 2px 0 4px 0;
   font-weight: 400;
   line-height: 1.2;
   color: #fff;
@@ -82,6 +82,7 @@
   justify-content: flex-start;
   color: rgba(255,255,255,0.85);
   flex-wrap: wrap;
+  padding: 6px 0;
 }
 
 .movie-actions-inline {
@@ -90,7 +91,7 @@
   align-items: center;
   justify-content: flex-start;
   flex-shrink: 0;
-  margin-top: -5px;
+  margin-top: -3.5px;
 }
 
 .chat-button-inline {
@@ -204,7 +205,7 @@
   min-height: 28px;
   line-height: 1;
   box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15);
-  margin-top: -0.5px;
+  margin-top: -1.5px;
 }
 
 .movie-rating .star { 
@@ -216,7 +217,7 @@
 }
 
 .movie-date {
-  margin-top: -0.5px;
+  margin-top: -1.5px;
 }
 
 .movie-card:hover {
@@ -237,7 +238,7 @@
 @media (min-width: 1025px) {
   .movie-card {
     width: 220px;
-    height: 392px;
+    height: 395px;
   }
 
   .movie-image {
@@ -245,7 +246,7 @@
   }
 
   .movie-info {
-    padding: 10px 12px 4px 12px;
+    padding: 10px 12px 3px 12px;
   }
 
   .movie-title {
@@ -289,7 +290,7 @@
 @media (min-width: 768px) and (max-width: 1024px) {
   .movie-card {
     width: 220px;
-    height: 392px;
+    height: 395px;
   }
 
   .movie-image {
@@ -297,7 +298,7 @@
   }
 
   .movie-info {
-    padding: 10px 12px 4px 12px;
+    padding: 10px 12px 3px 12px;
   }
 
   .movie-title {
@@ -341,7 +342,7 @@
 @media (min-width: 641px) and (max-width: 767px) {
   .movie-card {
     width: 200px;
-    height: 370px;
+    height: 373px;
   }
 
   .movie-image {
@@ -349,7 +350,7 @@
   }
 
   .movie-info {
-    padding: 8px 10px 3px 10px;
+    padding: 8px 10px 2px 10px;
   }
 
   .movie-title {
@@ -393,7 +394,7 @@
 @media (min-width: 481px) and (max-width: 640px) {
   .movie-card {
     width: 180px;
-    height: 352px;
+    height: 355px;
   }
 
   .movie-image {
@@ -401,7 +402,7 @@
   }
 
   .movie-info {
-    padding: 8px 9px 3px 9px;
+    padding: 8px 9px 2px 9px;
   }
 
   .movie-title {
@@ -445,7 +446,7 @@
 @media (min-width: 361px) and (max-width: 480px) {
   .movie-card {
     width: 160px;
-    height: 322px;
+    height: 325px;
   }
 
   .movie-image {
@@ -453,7 +454,7 @@
   }
 
   .movie-info {
-    padding: 7px 8px 2px 8px;
+    padding: 7px 8px 1px 8px;
   }
 
   .movie-title {
@@ -497,7 +498,7 @@
 @media (max-width: 360px) {
   .movie-card {
     width: 140px;
-    height: 290px;
+    height: 293px;
   }
 
   .movie-image {
@@ -505,7 +506,7 @@
   }
 
   .movie-info {
-    padding: 6px 8px 2px 8px;
+    padding: 6px 8px 1px 8px;
   }
 
   .movie-title {
