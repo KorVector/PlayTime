@@ -205,7 +205,7 @@
 }
 
 .movie-card:hover {
-  transform: translateY(-10px);
+  transform: translateY(-10px) scale(1.05);
   border-color: rgba(255,255,255,0.04);
 }
 
