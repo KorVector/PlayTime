@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, updateDoc, increment, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, query, where, onSnapshot, updateDoc, increment, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useResponsive } from '../hooks/useResponsive';
 import '../styles/PostDetailPage.css';
+
+interface FirestoreError extends Error {
+  code?: string;
+}
 
 interface Comment {
   id: string;
@@ -34,6 +38,8 @@ const PostDetailPage: React.FC = () => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [commentsError, setCommentsError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
@@ -49,6 +55,7 @@ const PostDetailPage: React.FC = () => {
   useEffect(() => {
     if (!postId) return;
 
+    setError(null);
     const fetchPost = async () => {
       try {
         const postRef = doc(db, 'posts', postId);
@@ -59,10 +66,18 @@ const PostDetailPage: React.FC = () => {
             id: postSnap.id,
             ...postSnap.data()
           } as Post);
+        } else {
+          setError('게시글을 찾을 수 없습니다.');
         }
         setLoading(false);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('게시글 조회 오류:', error);
+        const firestoreError = error as FirestoreError;
+        if (firestoreError.code === 'permission-denied') {
+          setError('게시글을 볼 권한이 없습니다.');
+        } else {
+          setError('게시글을 불러오는데 실패했습니다.');
+        }
         setLoading(false);
       }
     };
@@ -74,11 +89,12 @@ const PostDetailPage: React.FC = () => {
   useEffect(() => {
     if (!postId) return;
 
+    setCommentsError(null);
     const commentsRef = collection(db, 'comments');
+    // 인덱스 없이도 작동하도록 클라이언트에서 정렬
     const q = query(
       commentsRef,
-      where('postId', '==', postId),
-      orderBy('createdAt', 'asc')
+      where('postId', '==', postId)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -89,9 +105,20 @@ const PostDetailPage: React.FC = () => {
           ...doc.data()
         } as Comment);
       });
+      // 클라이언트에서 createdAt 기준 오름차순 정렬
+      newComments.sort((a, b) => {
+        const aTime = a.createdAt?.toMillis?.() ?? 0;
+        const bTime = b.createdAt?.toMillis?.() ?? 0;
+        return aTime - bTime;
+      });
       setComments(newComments);
-    }, (error) => {
+    }, (error: FirestoreError) => {
       console.error('댓글 구독 오류:', error);
+      if (error.code === 'failed-precondition') {
+        setCommentsError('데이터베이스 설정이 필요합니다. 관리자에게 문의해주세요.');
+      } else {
+        setCommentsError('댓글을 불러오는데 실패했습니다.');
+      }
     });
 
     return () => unsubscribe();
@@ -99,7 +126,16 @@ const PostDetailPage: React.FC = () => {
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim() || !user || !postId) return;
+    
+    if (!newComment.trim()) {
+      alert('댓글 내용을 입력해주세요.');
+      return;
+    }
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+    if (!postId) return;
 
     setSubmitting(true);
     try {
@@ -107,7 +143,7 @@ const PostDetailPage: React.FC = () => {
       await addDoc(commentsRef, {
         postId: postId,
         authorId: user.uid,
-        authorName: user.displayName || '익명',
+        authorName: user.displayName || user.email?.split('@')[0] || '익명',
         content: newComment.trim(),
         createdAt: Timestamp.now(),
       });
@@ -119,9 +155,14 @@ const PostDetailPage: React.FC = () => {
       });
 
       setNewComment('');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('댓글 작성 오류:', error);
-      alert('댓글 작성에 실패했습니다.');
+      const firestoreError = error as FirestoreError;
+      if (firestoreError.code === 'permission-denied') {
+        alert('댓글 작성 권한이 없습니다. 다시 로그인해주세요.');
+      } else {
+        alert('댓글 작성에 실패했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -151,14 +192,14 @@ const PostDetailPage: React.FC = () => {
     );
   }
 
-  if (!post) {
+  if (error || !post) {
     return (
       <div className={`post-detail-page ${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'}`}>
         <div className="post-detail-container">
           <button className="back-button" onClick={() => navigate(-1)}>
             ← 뒤로가기
           </button>
-          <div className="no-post">게시글을 찾을 수 없습니다.</div>
+          <div className="no-post">{error || '게시글을 찾을 수 없습니다.'}</div>
         </div>
       </div>
     );
@@ -193,7 +234,9 @@ const PostDetailPage: React.FC = () => {
           <h2 className="comments-title">댓글 {comments.length}</h2>
           
           <div className="comments-list">
-            {comments.length === 0 ? (
+            {commentsError ? (
+              <div className="error-comments">{commentsError}</div>
+            ) : comments.length === 0 ? (
               <div className="no-comments">아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!</div>
             ) : (
               comments.map((comment) => (

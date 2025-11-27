@@ -172,7 +172,8 @@
 }
 
 .loading-messages,
-.no-messages {
+.no-messages,
+.error-messages {
   color: #9ca3af;
   text-align: center;
   padding: 40px 20px;
@@ -181,6 +182,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.error-messages {
+  color: #f87171;
 }
 
 /* 모바일 */

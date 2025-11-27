@@ -154,11 +154,19 @@
 }
 
 .loading-posts,
-.no-posts {
+.no-posts,
+.error-posts {
   color: #9ca3af;
   text-align: center;
   padding: 40px 20px;
   font-size: 15px;
+}
+
+.error-posts {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 12px;
 }
 
 .posts-list {
