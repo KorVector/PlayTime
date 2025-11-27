@@ -189,7 +189,7 @@
   min-height: 28px;
   line-height: 1;
   box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15);
-  margin-top: 1px;
+  margin-top: -0.5px;
 }
 
 .movie-rating .star { 
@@ -201,7 +201,7 @@
 }
 
 .movie-date {
-  margin-top: 1px;
+  margin-top: -0.5px;
 }
 
 .movie-card:hover {
