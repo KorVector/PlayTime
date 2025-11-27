@@ -37,47 +37,8 @@
   pointer-events: none;
 }
 
-.movie-card:hover {
-  transform: translateY(-10px);
-  border-color: rgba(255,255,255,0.04);
-}
-
-.movie-card:hover::before {
-  opacity: 1;
-  box-shadow: 0 0 12px rgba(0, 255, 47, 0.4);
-}
-
-@media (max-width: 1024px) and (min-width: 641px) {
-  .movie-card {
-    width: 220px;
-    height: 392px;
-    border-radius: 14px;
-  }
-
-  .movie-image {
-    height: 240px;
-  }
-
-  .movie-title {
-    font-size: 15px;
-    line-height: 18px;
-  }
-
-  .chat-button {
-    font-size: 10px;
-    height: 30px;
-    font-weight: 400;
-  }
-
-  .heart-button svg {
-    width: 24px;
-    height: 24px;
-  }
-}
-
 .movie-image {
   width: 100%;
-  height: 270px;
   display: block;
   object-fit: cover;
   flex-shrink: 0;
@@ -85,19 +46,15 @@
 
 .movie-info {
   position: static;
-  padding: 10px 12px 4px 12px;
   background: transparent;
   flex-shrink: 0;
 }
 
 .movie-title {
-  margin: 0 0 4px 0;
-  font-size: 16px;
-  /* make title thinner as requested */
+  margin: 0;
   font-weight: 400;
   line-height: 1.2;
   color: #fff;
-  /* Single-line ellipsis: force one line only */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -108,7 +65,6 @@
   gap: 6px;
   align-items: center;
   justify-content: flex-start;
-  font-size: 12px;
   color: rgba(255,255,255,0.85);
   flex-wrap: wrap;
 }
@@ -123,8 +79,6 @@
 }
 
 .chat-button-inline {
-  width: 40px;
-  height: 40px;
   flex-shrink: 0;
   background: transparent;
   border: none;
@@ -144,8 +98,6 @@
 .chat-button-inline .chat-icon {
   color: rgba(255, 255, 255, 0.8);
   transition: color 0.3s ease;
-  width: 18px;
-  height: 18px;
 }
 
 .chat-button-inline::before {
@@ -188,26 +140,17 @@
   flex-shrink: 0;
 }
 
-.movie-like-button-inline svg {
-  width: 26px !important;
-  height: 26px !important;
-}
-
 .movie-actions {
   position: static;
   display: flex;
   flex-direction: row;
   gap: 8px;
-  padding: 0px 12px 10px 12px;
   background: transparent;
   flex-shrink: 0;
   align-items: center;
   justify-content: flex-end;
 }
 
-
-
-/* Heart Button SVG styles */
 .heart-button {
   background: transparent;
   border: none;
@@ -229,20 +172,8 @@
   transform: scale(0.95);
 }
 
-.heart-button svg {
-  width: 28px;
-  height: 28px;
-}
-
 .heart-button.liked {
   transform: scale(1.06);
-}
-
-/* Rating pill */
-.movie-meta{
-  display: flex;
-  gap: 10px;
-  align-items: center;
 }
 
 .movie-rating {
@@ -255,106 +186,339 @@
   border-radius: 12px;
   color: #ffffff;
   font-weight: 700;
-  font-size: 14px;
   min-height: 28px;
   line-height: 1;
   box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15);
 }
 
-.movie-rating .star { display: block }
-.rating-value { color: #fff; }
+.movie-rating .star { 
+  display: block;
+}
 
-/* 태블릿 (641px - 1024px) */
-@media (max-width: 1024px) and (min-width: 641px) {
+.rating-value { 
+  color: #fff; 
+}
+
+.movie-card:hover {
+  transform: translateY(-10px);
+  border-color: rgba(255,255,255,0.04);
+}
+
+.movie-card:hover::before {
+  opacity: 1;
+  box-shadow: 0 0 12px rgba(0, 255, 47, 0.4);
+}
+
+/* 데스크톱 (1025px 이상) */
+@media (min-width: 1025px) {
   .movie-card {
     width: 220px;
-    height: 380px;
-    border-radius: 15px;
+    height: 392px;
   }
 
   .movie-image {
-    height: 240px;
+    height: 270px;
+  }
+
+  .movie-info {
+    padding: 10px 12px 4px 12px;
   }
 
   .movie-title {
+    font-size: 16px;
+  }
+
+  .movie-meta {
+    font-size: 12px;
+  }
+
+  .chat-button-inline {
+    width: 40px;
+    height: 40px;
+  }
+
+  .chat-button-inline .chat-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .movie-like-button-inline svg {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .movie-actions {
+    padding: 0px 12px 10px 12px;
+  }
+
+  .heart-button svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .movie-rating {
     font-size: 14px;
+  }
+}
+
+/* 태블릿/노트북 (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .movie-card {
+    width: 220px;
+    height: 392px;
+  }
+
+  .movie-image {
+    height: 270px;
+  }
+
+  .movie-info {
+    padding: 10px 12px 4px 12px;
+  }
+
+  .movie-title {
+    font-size: 16px;
+  }
+
+  .movie-meta {
+    font-size: 12px;
+  }
+
+  .chat-button-inline {
+    width: 40px;
+    height: 40px;
+  }
+
+  .chat-button-inline .chat-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .movie-like-button-inline svg {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .movie-actions {
+    padding: 0px 12px 10px 12px;
+  }
+
+  .heart-button svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .movie-rating {
+    font-size: 14px;
+  }
+}
+
+/* 소형 태블릿 (641px - 767px) */
+@media (min-width: 641px) and (max-width: 767px) {
+  .movie-card {
+    width: 200px;
+    height: 370px;
+  }
+
+  .movie-image {
+    height: 250px;
+  }
+
+  .movie-info {
+    padding: 8px 10px 3px 10px;
+  }
+
+  .movie-title {
+    font-size: 15px;
+  }
+
+  .movie-meta {
+    font-size: 11px;
+  }
+
+  .chat-button-inline {
+    width: 36px;
+    height: 36px;
+  }
+
+  .chat-button-inline .chat-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .movie-like-button-inline svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .movie-actions {
+    padding: 0px 10px 8px 10px;
   }
 
   .heart-button svg {
     width: 24px;
     height: 24px;
   }
+
+  .movie-rating {
+    font-size: 12px;
+  }
 }
 
-/* 모바일 (max-width: 640px) */
-@media (max-width: 640px) {
+/* 모바일 (481px - 640px) */
+@media (min-width: 481px) and (max-width: 640px) {
   .movie-card {
     width: 180px;
     height: 352px;
-    font-size: 12px;
-    border-radius: 12px;
   }
 
   .movie-image {
     height: 220px;
   }
 
+  .movie-info {
+    padding: 8px 9px 3px 9px;
+  }
+
   .movie-title {
     font-size: 13px;
-    line-height: 16px;
   }
 
-  .movie-date {
+  .movie-meta {
     font-size: 11px;
   }
 
-  .movie-rating {
-    font-size: 11px;
+  .chat-button-inline {
+    width: 36px;
+    height: 36px;
+  }
+
+  .chat-button-inline .chat-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .movie-like-button-inline svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .movie-actions {
+    padding: 0px 9px 8px 9px;
   }
 
   .heart-button svg {
     width: 22px;
     height: 22px;
   }
+
+  .movie-rating {
+    font-size: 11px;
+  }
 }
 
-/* 초소형 모바일 (max-width: 360px) */
-@media (max-width: 360px) {
+/* 소형 모바일 (361px - 480px) */
+@media (min-width: 361px) and (max-width: 480px) {
   .movie-card {
     width: 160px;
     height: 322px;
-    border-radius: 10px;
   }
 
   .movie-image {
     height: 200px;
   }
 
+  .movie-info {
+    padding: 7px 8px 2px 8px;
+  }
+
   .movie-title {
-    font-size: 11px;
-    line-height: 13px;
+    font-size: 12px;
   }
 
-  .movie-date {
-    font-size: 9px;
+  .movie-meta {
+    font-size: 10px;
   }
 
-  .movie-rating {
-    font-size: 9px;
+  .chat-button-inline {
+    width: 32px;
+    height: 32px;
+  }
+
+  .chat-button-inline .chat-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .movie-like-button-inline svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  .movie-actions {
+    padding: 0px 8px 7px 8px;
   }
 
   .heart-button svg {
     width: 20px;
     height: 20px;
   }
+
+  .movie-rating {
+    font-size: 10px;
+  }
 }
 
-/* Ensure .movie-info/.movie-actions stay in normal document flow across all breakpoints */
-.movie-info,
-.movie-actions {
-  position: static !important;
-  left: auto !important;
-  right: auto !important;
-  bottom: auto !important;
-  max-width: 100% !important;
+/* 초소형 모바일 (max-width: 360px) */
+@media (max-width: 360px) {
+  .movie-card {
+    width: 140px;
+    height: 290px;
+  }
+
+  .movie-image {
+    height: 180px;
+  }
+
+  .movie-info {
+    padding: 6px 8px 2px 8px;
+  }
+
+  .movie-title {
+    font-size: 11px;
+  }
+
+  .movie-meta {
+    font-size: 9px;
+  }
+
+  .chat-button-inline {
+    width: 28px;
+    height: 28px;
+  }
+
+  .chat-button-inline .chat-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .movie-like-button-inline svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .movie-actions {
+    padding: 0px 8px 6px 8px;
+  }
+
+  .heart-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .movie-rating {
+    font-size: 9px;
+  }
 }
+
+
