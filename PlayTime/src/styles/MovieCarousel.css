@@ -37,21 +37,12 @@
 }
 
 .movies-grid {
-  display: flex;
-  gap: 72px;
-  padding: 40px 20px;
-  align-items: flex-start;
-  justify-content: center;
-  scroll-behavior: smooth;
-  overflow-x: auto;
-}
-
-.movies-grid.grid-2 {
-  gap: 72px;
-}
-
-.movies-grid.grid-3 {
-  gap: 72px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  padding: 24px 20px;
+  align-items: center;
+  justify-items: center;
 }
 
 .movies-grid::-webkit-scrollbar {
@@ -59,17 +50,17 @@
 }
 
 .movies-grid::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
 }
 
 .movies-grid::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.18);
   border-radius: 10px;
 }
 
 .movies-grid::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.26);
 }
 
 .carousel-controls {
@@ -109,9 +100,8 @@
   }
 
   .movies-grid {
-    gap: 48px;
-    padding: 30px 15px;
-    overflow-x: auto;
+    gap: 20px;
+    padding: 20px 15px;
     justify-content: center;
   }
 
@@ -140,15 +130,9 @@
   }
 
   .movies-grid {
-    gap: 28px;
-    padding: 20px 10px;
-    overflow-x: auto;
-    justify-content: center;
-  }
-
-  .movies-grid.grid-2 {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    padding: 16px 10px;
   }
 
   .carousel-controls {
@@ -176,10 +160,9 @@
   }
 
   .movies-grid {
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
     padding: 15px 8px;
-    overflow-x: auto;
-    justify-content: center;
   }
 
   .carousel-controls {

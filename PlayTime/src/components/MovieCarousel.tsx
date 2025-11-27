@@ -8,7 +8,6 @@ interface Movie {
   title: string;
   date: string;
   rating: string;
-  languages: string[];
   image?: string;
 }
 
@@ -41,7 +40,6 @@ const MovieCarousel: React.FC<MovieCarouselProps> = ({ movies = [], title, child
                 title={movie.title}
                 date={movie.date}
                 rating={movie.rating}
-                languages={movie.languages}
                 image={movie.image}
                 onChatClick={() => console.log(`${movie.title} 채팅방`)}
               />
@@ -56,4 +54,4 @@ const MovieCarousel: React.FC<MovieCarouselProps> = ({ movies = [], title, child
   );
 };
 
-export default MovieCarousel;
+export default React.memo(MovieCarousel);

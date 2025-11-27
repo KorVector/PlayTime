@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, memo } from 'react';
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -16,7 +16,7 @@ interface TmdbMovie {
 
 import MovieCard from './MovieCard';
 
-export default function MovieList() {
+function MovieList() {
   const [movies, setMovies] = useState<TmdbMovie[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,8 +48,8 @@ export default function MovieList() {
     fetchMovies();
   }, []);
 
-  // helper: shuffle and pick up to 4 movies
-  const getRandomMovies = (arr: TmdbMovie[], count = 4) => {
+  // helper: shuffle and pick up to N movies (default 7)
+  const getRandomMovies = (arr: TmdbMovie[], count = 7) => {
     const copy = arr.slice();
     for (let i = copy.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -58,43 +58,58 @@ export default function MovieList() {
     return copy.slice(0, Math.min(count, copy.length));
   };
 
-  const displayed = getRandomMovies(movies, 4);
+  // pick 7 movies to display (computed once per `movies` change to avoid reshuffle on every render)
+  const displayed = useMemo(() => getRandomMovies(movies, 7), [movies]);
 
   const STORAGE_KEY = 'likedMovies';
 
-  const readLiked = (): any[] => {
+  // liked state (keep in memory to avoid reading localStorage on every render)
+  const [likedIds, setLikedIds] = useState<number[]>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
+      const parsed = raw ? JSON.parse(raw) : [];
+      return parsed.map((it: any) => it.id);
     } catch {
       return [];
     }
-  };
+  });
 
-  const isMovieLiked = (id: number) => {
-    return readLiked().some((it) => it.id === id);
+  const isMovieLiked = (id: number) => likedIds.includes(id);
+
+  const syncLocalStorage = (items: any[]) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch (e) {
+      console.warn('localStorage 저장 실패', e);
+    }
   };
 
   const toggleLike = (movie: TmdbMovie, liked: boolean) => {
-    const current = readLiked();
-    if (liked) {
-      // add
-      const toAdd = {
-        id: movie.id,
-        title: movie.title,
-        image: movie.poster_path ? `${IMAGE_BASE}${movie.poster_path}` : undefined,
-        date: movie.release_date,
-        rating: String(movie.vote_average),
-      };
-      const exists = current.some((it) => it.id === movie.id);
-      if (!exists) {
-        current.unshift(toAdd);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const current = raw ? JSON.parse(raw) : [];
+
+      if (liked) {
+        const toAdd = {
+          id: movie.id,
+          title: movie.title,
+          image: movie.poster_path ? `${IMAGE_BASE}${movie.poster_path}` : undefined,
+          date: movie.release_date,
+          rating: String(movie.vote_average),
+        };
+        const exists = current.some((it: any) => it.id === movie.id);
+        if (!exists) {
+          const updated = [toAdd, ...current];
+          syncLocalStorage(updated);
+          setLikedIds((s) => (s.includes(movie.id) ? s : [movie.id, ...s]));
+        }
+      } else {
+        const filtered = current.filter((it: any) => it.id !== movie.id);
+        syncLocalStorage(filtered);
+        setLikedIds((s) => s.filter((id) => id !== movie.id));
       }
-    } else {
-      // remove
-      const filtered = current.filter((it) => it.id !== movie.id);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    } catch (e) {
+      console.error('찜 토글 실패:', e);
     }
   };
 
@@ -105,19 +120,18 @@ export default function MovieList() {
 
       {/* return just the MovieCard elements (no outer container) so MovieCarousel can layout them */}
       {displayed.map((m) => (
-        <div key={m.id} style={{ flex: '0 0 auto' }}>
-          <MovieCard
-            id={m.id}
-            image={m.poster_path ? `${IMAGE_BASE}${m.poster_path}` : undefined}
-            title={m.title}
-            date={m.release_date || ''}
-            rating={String(m.vote_average)}
-            languages={[m.original_language ? m.original_language.toUpperCase() : 'EN']}
-            onChatClick={() => console.log(`채팅방 진입: ${m.title}`)}
-            onLikeClick={(liked) => toggleLike(m, liked)}
-            isLiked={isMovieLiked(m.id)}
-          />
-        </div>
+        <MovieCard
+          key={m.id}
+          id={m.id}
+          image={m.poster_path ? `${IMAGE_BASE}${m.poster_path}` : undefined}
+          title={m.title}
+          date={m.release_date || ''}
+          rating={String(m.vote_average)}
+          
+          onChatClick={() => console.log(`채팅방 진입: ${m.title}`)}
+          onLikeClick={(liked) => toggleLike(m, liked)}
+          isLiked={isMovieLiked(m.id)}
+        />
       ))}
 
       {displayed.length === 0 && !loading && !error && (
@@ -126,3 +140,5 @@ export default function MovieList() {
     </>
   );
 }
+
+export default memo(MovieList);

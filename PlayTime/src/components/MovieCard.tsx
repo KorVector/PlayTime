@@ -67,7 +67,6 @@ interface MovieCardProps {
   title: string;
   date: string;
   rating: string;
-  languages: string[];
   onChatClick?: () => void;
   onLikeClick?: (liked: boolean) => void;
   isLiked?: boolean;
@@ -79,7 +78,6 @@ const MovieCard: React.FC<MovieCardProps> = ({
   title,
   date,
   rating,
-  languages,
   onChatClick,
   onLikeClick,
   isLiked: initialLiked = false,
@@ -112,6 +110,8 @@ const MovieCard: React.FC<MovieCardProps> = ({
       <div className="movie-info">
         <h3 className="movie-title">{title}</h3>
         <div className="movie-meta">
+          <p className="movie-date">{date}</p>
+
           <div className="movie-rating" aria-hidden>
             <svg className="star" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="#FFD166"/>
@@ -119,34 +119,23 @@ const MovieCard: React.FC<MovieCardProps> = ({
             <span className="rating-value">{(Number(rating) || 0).toFixed(1)}</span>
           </div>
 
-          <p className="movie-date">{date}</p>
-        </div>
-      </div>
+          <div className="movie-actions-inline">
+            <button className="chat-button-inline" onClick={handleChatClick}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="chat-icon">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
 
-      {/* 하단: 언어태그(왼쪽), 채팅버튼 + 찜(오른쪽) */}
-      <div className="movie-actions">
-        <div className="actions-left">
-          <div className="movie-languages">
-            {languages.map((lang, idx) => (
-              <span key={idx} className="language-tag">{lang}</span>
-            ))}
+            <HeartIcon 
+              liked={isLiked}
+              onClick={handleLikeClick}
+              className="movie-like-button-inline"
+            />
           </div>
-        </div>
-
-        <div className="actions-right">
-          <button className="chat-button chat-near-heart" onClick={handleChatClick}>
-            채팅방 바로가기
-          </button>
-
-          <HeartIcon 
-            liked={isLiked}
-            onClick={handleLikeClick}
-            className="movie-like-button"
-          />
         </div>
       </div>
     </div>
   );
 };
 
-export default MovieCard;
+export default React.memo(MovieCard);

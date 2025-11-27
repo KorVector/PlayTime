@@ -8,14 +8,14 @@
   left: 0;
   right: 0;
   width: 100%;
-  height: 143px;
+  height: 88px; /* reduced height */
   background-color: black;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   z-index: 1000;
   display: flex;
   align-items: center;
   box-sizing: border-box;
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.28s cubic-bezier(.2,.9,.2,1), height 0.18s ease;
 }
 
 .header.hidden {
@@ -26,7 +26,7 @@
   width: 100%;
   max-width: 1920px;
   margin: 0 auto;
-  padding: 0 44px;
+  padding: 0 24px; /* reduced left/right padding to move logo left */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -34,11 +34,80 @@
 }
 
 .logo {
-  color: white;
-  font-size: 40px;
+  font-size: 28px; /* smaller */
   font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-weight: 800; /* keep logo bold */
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-right: 6px;
+  line-height: 0; /* prevent font baseline offset */
+}
+
+.logo-mark svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.logo:hover .logo-mark svg {
+  transform: translateY(-2px) scale(1.03);
+  opacity: 0.98;
+}
+
+/* ensure the triangle inside the svg is perfectly centered */
+.logo-mark svg polygon {
+  transform-origin: 50% 50%;
+}
+
+/* nudge the play triangle slightly left for better visual centering */
+.logo-mark svg polygon {
+  transform: translateX(-1px);
+  transition: transform 0.18s ease;
+}
+
+.logo:hover .logo-mark svg polygon {
+  transform: translateX(-2px);
+}
+
+.logo-gradient {
+  /* Stronger, wider gradient sweep while keeping same cyan->green family */
+  background-image: linear-gradient(90deg, #007ea7 0%, #00a8c7 30%, #00c9df 55%, #36f08b 80%, #00ff2f 100%);
+  background-size: 400% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: logoGradient 3s ease-in-out infinite;
+  font-weight: 800; /* keep logo bold */
+  font-size: 28px; /* match reduced header */
+  transition: transform 0.18s ease, filter 0.18s ease;
+  /* subtle glow to make color shifts more perceptible */
+  filter: drop-shadow(0 6px 12px rgba(0, 201, 223, 0.10)) drop-shadow(0 4px 10px rgba(0, 255, 47, 0.06));
+}
+
+.logo:hover .logo-gradient {
+  transform: translateY(-3px) scale(1.02);
+  filter: drop-shadow(0 10px 22px rgba(0, 201, 223, 0.16)) drop-shadow(0 6px 14px rgba(0, 255, 47, 0.08));
+}
+
+@keyframes logoGradient {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 50% 50%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .menu-toggle {
@@ -58,21 +127,21 @@
 
 .nav-menu {
   display: flex;
-  gap: 40px;
+  gap: 28px; /* slightly tighter */
   align-items: center;
-  transition: all 0.3s ease;
+  transition: all 0.22s ease;
 }
 
 .nav-item {
   background: none;
   border: none;
   color: white;
-  font-size: 25px;
+  font-size: 16px; /* reduced */
   font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
+  font-weight: 400; /* thinner */
   cursor: pointer;
   padding: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.22s ease, transform 0.18s ease;
   white-space: nowrap;
 }
 
@@ -81,7 +150,7 @@
 }
 
 .login-btn {
-  font-size: 25px;
+  font-size: 16px;
   font-weight: 500;
 }
 
@@ -111,34 +180,34 @@
 
 /* 프로필 이미지 */
 .profile-image {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   object-fit: cover;
 }
 
 /* 프로필 이니셜 */
 .profile-initial {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.32);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 400; /* thinner */
   font-family: 'DM Sans', sans-serif;
 }
 
 /* 프로필 이름 */
 .profile-name {
   color: black;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 400; /* thinner */
   font-family: 'DM Sans', sans-serif;
-  max-width: 120px;
+  max-width: 110px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -197,59 +266,63 @@
 /* 태블릿 (641px - 1024px) */
 @media (max-width: 1024px) and (min-width: 641px) {
   .header {
-    height: 120px;
+    height: 72px; /* compact for tablet */
   }
 
   .header-container {
-    padding: 0 30px;
+    padding: 0 28px;
   }
 
   .logo {
-    font-size: 32px;
+    font-size: 24px;
   }
 
+  .logo-mark { width: 30px; height: 30px; }
+
   .nav-menu {
-    gap: 30px;
+    gap: 22px;
   }
 
   .nav-item {
-    font-size: 18px;
+    font-size: 15px;
   }
 
   .profile-btn {
-    padding: 6px 12px;
+    padding: 6px 10px;
     gap: 8px;
   }
 
   .profile-initial,
   .profile-image {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
 
   .profile-initial {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .profile-name {
-    font-size: 14px;
-    max-width: 100px;
+    font-size: 13px;
+    max-width: 92px;
   }
 }
 
 /* 모바일 (max-width: 640px) */
 @media (max-width: 640px) {
   .header {
-    height: 100px;
+    height: 64px; /* compact mobile header */
   }
 
   .header-container {
-    padding: 0 20px;
+    padding: 0 16px;
   }
 
   .logo {
-    font-size: 28px;
+    font-size: 20px;
   }
+
+  .logo-mark { width: 26px; height: 26px; }
 
   .menu-toggle {
     display: block;
@@ -257,16 +330,16 @@
 
   .nav-menu {
     position: fixed;
-    top: 100px;
+    top: 64px; /* align with reduced header */
     left: 0;
     right: 0;
     background-color: rgba(0, 0, 0, 0.95);
     flex-direction: column;
-    gap: 15px;
-    padding: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 12px;
+    padding: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.22s ease;
     z-index: 999;
     width: 100%;
     box-sizing: border-box;
@@ -277,8 +350,8 @@
   }
 
   .nav-item {
-    font-size: 14px;
-    padding: 10px 0;
+    font-size: 13px;
+    padding: 8px 0;
   }
 
   .profile-container {
@@ -290,38 +363,40 @@
   .profile-btn {
     width: 100%;
     justify-content: flex-start;
-    padding: 10px 16px;
+    padding: 8px 12px;
   }
 
   .profile-dropdown {
     position: static;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 8px;
   }
 }
 
 /* 초소형 모바일 (max-width: 360px) */
 @media (max-width: 360px) {
   .header {
-    height: 90px;
+    height: 60px;
   }
 
   .header-container {
-    padding: 0 15px;
+    padding: 0 12px;
   }
 
   .logo {
-    font-size: 24px;
+    font-size: 18px;
   }
 
+  .logo-mark { width: 24px; height: 24px; }
+
   .menu-toggle {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .nav-menu {
-    top: 90px;
-    padding: 15px;
-    gap: 12px;
+    top: 60px;
+    padding: 12px;
+    gap: 10px;
   }
 
   .nav-item {
