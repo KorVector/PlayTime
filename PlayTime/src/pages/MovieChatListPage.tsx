@@ -76,7 +76,6 @@ const MovieChatListPage: React.FC = () => {
               title={movie.title}
               date={movie.release_date || ''}
               rating={String(movie.vote_average)}
-              languages={[movie.original_language ? movie.original_language.toUpperCase() : 'EN']}
             />
           ))}
         </div>

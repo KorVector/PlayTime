@@ -4,6 +4,16 @@ This template provides a minimal setup to get React working in Vite with HMR and
 
 While this project uses React, Vite supports many popular JS frameworks. [See all the supported frameworks](https://vitejs.dev/guide/#scaffolding-your-first-vite-project).
 
+## Features
+
+### Authentication Required Features
+
+The following features require user authentication (login):
+
+- **찜하기 (Favorites)**: Users must be logged in to add or remove movies from their favorites list. Clicking the heart icon while not logged in will prompt the user to log in.
+- **MY 찜 보기 (View Favorites)**: Viewing the favorites list requires authentication. Clicking this button while not logged in will prompt the user to log in.
+- **채팅 (Chat)**: All chat-related features require authentication.
+
 ## Deploy Your Own
 
 Deploy your own Vite project with Vercel.

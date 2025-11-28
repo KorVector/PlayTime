@@ -70,6 +70,8 @@ interface MovieCardProps {
   onChatClick?: () => void;
   onLikeClick?: (liked: boolean) => void;
   isLiked?: boolean;
+  isAuthenticated?: boolean;
+  onAuthRequired?: () => void;
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({
@@ -81,11 +83,19 @@ const MovieCard: React.FC<MovieCardProps> = ({
   onChatClick,
   onLikeClick,
   isLiked: initialLiked = false,
+  isAuthenticated = false,
+  onAuthRequired,
 }) => {
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(initialLiked);
 
   const handleLikeClick = () => {
+    // Check authentication before toggling like
+    if (!isAuthenticated) {
+      onAuthRequired?.();
+      return;
+    }
+    
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
     // 부모 컴포넌트에도 알림 (콜백 제공된 경우)

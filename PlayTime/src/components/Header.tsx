@@ -87,6 +87,11 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   };
 
   const handleOpenLiked = () => {
+    // Check authentication before showing liked modal
+    if (!user) {
+      onLoginClick?.();
+      return;
+    }
     const openLikedFn = (window as Window & { openLiked?: () => void }).openLiked;
     if (typeof openLikedFn === 'function') {
       openLikedFn();
