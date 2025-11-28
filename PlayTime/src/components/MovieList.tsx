@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, memo } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -14,9 +15,22 @@ interface TmdbMovie {
   original_language?: string;
 }
 
+interface LikedItem {
+  id: number;
+  title?: string;
+  image?: string;
+  date?: string;
+  rating?: string;
+}
+
 import MovieCard from './MovieCard';
 
-function MovieList() {
+interface MovieListProps {
+  onAuthRequired?: () => void;
+}
+
+function MovieList({ onAuthRequired }: MovieListProps) {
+  const { user } = useAuth();
   const [movies, setMovies] = useState<TmdbMovie[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +51,7 @@ function MovieList() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setMovies(data.results || []);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
         setError('영화 데이터를 불러오는 중 오류가 발생했습니다. 콘솔을 확인하세요.');
       } finally {
@@ -63,20 +77,36 @@ function MovieList() {
 
   const STORAGE_KEY = 'likedMovies';
 
-  // liked state (keep in memory to avoid reading localStorage on every render)
-  const [likedIds, setLikedIds] = useState<number[]>(() => {
+  // Helper to read liked IDs from localStorage
+  const readLikedIdsFromStorage = (): number[] => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      return parsed.map((it: any) => it.id);
+      const parsed: LikedItem[] = raw ? JSON.parse(raw) : [];
+      return parsed.map((it) => it.id);
     } catch {
       return [];
     }
+  };
+
+  // liked state (keep in memory to avoid reading localStorage on every render)
+  // Only load liked state for authenticated users
+  const [likedIds, setLikedIds] = useState<number[]>(() => {
+    if (!user) return [];
+    return readLikedIdsFromStorage();
   });
+
+  // Update liked state when user changes
+  useEffect(() => {
+    if (!user) {
+      setLikedIds([]);
+      return;
+    }
+    setLikedIds(readLikedIdsFromStorage());
+  }, [user]);
 
   const isMovieLiked = (id: number) => likedIds.includes(id);
 
-  const syncLocalStorage = (items: any[]) => {
+  const syncLocalStorage = (items: LikedItem[]) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch (e) {
@@ -85,26 +115,31 @@ function MovieList() {
   };
 
   const toggleLike = (movie: TmdbMovie, liked: boolean) => {
+    // Defense in depth: ensure user is authenticated before modifying favorites
+    if (!user) {
+      return;
+    }
+    
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      const current = raw ? JSON.parse(raw) : [];
+      const current: LikedItem[] = raw ? JSON.parse(raw) : [];
 
       if (liked) {
-        const toAdd = {
+        const toAdd: LikedItem = {
           id: movie.id,
           title: movie.title,
           image: movie.poster_path ? `${IMAGE_BASE}${movie.poster_path}` : undefined,
           date: movie.release_date,
           rating: String(movie.vote_average),
         };
-        const exists = current.some((it: any) => it.id === movie.id);
+        const exists = current.some((it) => it.id === movie.id);
         if (!exists) {
           const updated = [toAdd, ...current];
           syncLocalStorage(updated);
           setLikedIds((s) => (s.includes(movie.id) ? s : [movie.id, ...s]));
         }
       } else {
-        const filtered = current.filter((it: any) => it.id !== movie.id);
+        const filtered = current.filter((it) => it.id !== movie.id);
         syncLocalStorage(filtered);
         setLikedIds((s) => s.filter((id) => id !== movie.id));
       }
@@ -131,6 +166,8 @@ function MovieList() {
           onChatClick={() => console.log(`채팅방 진입: ${m.title}`)}
           onLikeClick={(liked) => toggleLike(m, liked)}
           isLiked={isMovieLiked(m.id)}
+          isAuthenticated={!!user}
+          onAuthRequired={onAuthRequired}
         />
       ))}
 

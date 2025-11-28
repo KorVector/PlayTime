@@ -20,12 +20,16 @@ import GenreBoardPage from './pages/GenreBoardPage';
 import PostDetailPage from './pages/PostDetailPage';
 import './App.css';
 
-function HomePage() {
+interface HomePageProps {
+  onAuthRequired: () => void;
+}
+
+function HomePage({ onAuthRequired }: HomePageProps) {
   return (
     <>
       <HeroSection />
       <MovieCarousel title="취향을 알아가는 순간, 영화는 더 재미있어진다.">
-        <MovieList />
+        <MovieList onAuthRequired={onAuthRequired} />
       </MovieCarousel>
       <FeaturesSection />
       <StatsSection />
@@ -38,7 +42,11 @@ function App() {
   const [likedOpen, setLikedOpen] = useState(false);
 
   // expose a small global helper so Header can open the liked modal without prop-drilling
-  (window as any).openLiked = () => setLikedOpen(true);
+  (window as typeof window & { openLiked?: () => void; openAuth?: () => void }).openLiked = () => setLikedOpen(true);
+  // expose auth modal opener for components that need it
+  (window as typeof window & { openAuth?: () => void }).openAuth = () => setAuthOpen(true);
+
+  const handleAuthRequired = () => setAuthOpen(true);
 
   return (
     <AuthProvider>
@@ -49,7 +57,7 @@ function App() {
           <LikedModal open={likedOpen} onClose={() => setLikedOpen(false)} />
           
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<HomePage onAuthRequired={handleAuthRequired} />} />
             <Route path="/live-chat" element={<ProtectedRoute><LiveChatRoom /></ProtectedRoute>} />
             <Route path="/chat-main" element={<ProtectedRoute><ChatMainPage /></ProtectedRoute>} />
             <Route path="/movie-chat-list" element={<ProtectedRoute><MovieChatListPage /></ProtectedRoute>} />

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/LikedModal.css';
 
 interface LikedItem {
@@ -17,10 +18,11 @@ interface LikedModalProps {
 const STORAGE_KEY = 'likedMovies';
 
 const LikedModal: React.FC<LikedModalProps> = ({ open, onClose }) => {
+  const { user } = useAuth();
   const [items, setItems] = useState<LikedItem[]>([]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !user) return;
     const raw = localStorage.getItem(STORAGE_KEY);
     try {
       const parsed = raw ? JSON.parse(raw) : [];
@@ -28,7 +30,7 @@ const LikedModal: React.FC<LikedModalProps> = ({ open, onClose }) => {
     } catch {
       setItems([]);
     }
-  }, [open]);
+  }, [open, user]);
 
   const removeItem = (id: number) => {
     const next = items.filter((i) => i.id !== id);
@@ -41,6 +43,23 @@ const LikedModal: React.FC<LikedModalProps> = ({ open, onClose }) => {
   };
 
   if (!open) return null;
+
+  // Show message if not authenticated
+  if (!user) {
+    return (
+      <div className="liked-modal-backdrop" onClick={onClose}>
+        <div className="liked-modal" onClick={(e) => e.stopPropagation()}>
+          <header className="liked-modal-header">
+            <h3>MY 찜 보기</h3>
+            <button className="close" onClick={onClose}>✕</button>
+          </header>
+          <div className="liked-modal-content">
+            <p className="empty">로그인이 필요합니다.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="liked-modal-backdrop" onClick={onClose}>
