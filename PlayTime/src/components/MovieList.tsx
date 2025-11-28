@@ -77,10 +77,8 @@ function MovieList({ onAuthRequired }: MovieListProps) {
 
   const STORAGE_KEY = 'likedMovies';
 
-  // liked state (keep in memory to avoid reading localStorage on every render)
-  // Only load liked state for authenticated users
-  const [likedIds, setLikedIds] = useState<number[]>(() => {
-    if (!user) return [];
+  // Helper to read liked IDs from localStorage
+  const readLikedIdsFromStorage = (): number[] => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       const parsed: LikedItem[] = raw ? JSON.parse(raw) : [];
@@ -88,6 +86,13 @@ function MovieList({ onAuthRequired }: MovieListProps) {
     } catch {
       return [];
     }
+  };
+
+  // liked state (keep in memory to avoid reading localStorage on every render)
+  // Only load liked state for authenticated users
+  const [likedIds, setLikedIds] = useState<number[]>(() => {
+    if (!user) return [];
+    return readLikedIdsFromStorage();
   });
 
   // Update liked state when user changes
@@ -96,13 +101,7 @@ function MovieList({ onAuthRequired }: MovieListProps) {
       setLikedIds([]);
       return;
     }
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const parsed: LikedItem[] = raw ? JSON.parse(raw) : [];
-      setLikedIds(parsed.map((it) => it.id));
-    } catch {
-      setLikedIds([]);
-    }
+    setLikedIds(readLikedIdsFromStorage());
   }, [user]);
 
   const isMovieLiked = (id: number) => likedIds.includes(id);
@@ -116,6 +115,11 @@ function MovieList({ onAuthRequired }: MovieListProps) {
   };
 
   const toggleLike = (movie: TmdbMovie, liked: boolean) => {
+    // Defense in depth: ensure user is authenticated before modifying favorites
+    if (!user) {
+      return;
+    }
+    
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       const current: LikedItem[] = raw ? JSON.parse(raw) : [];
