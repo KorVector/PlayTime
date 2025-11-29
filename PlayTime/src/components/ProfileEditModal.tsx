@@ -17,6 +17,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ open, onClose }) =>
   const [bio, setBio] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (!open || !user) return;
@@ -25,6 +26,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ open, onClose }) =>
       // Set initial values from Auth user
       setDisplayName(user.displayName || '');
       setPhotoURL(user.photoURL || '');
+      setImageError(false);
 
       // Try to load additional data from Firestore
       try {
@@ -45,6 +47,11 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ open, onClose }) =>
 
     loadProfile();
   }, [open, user]);
+
+  // Reset image error when photoURL changes
+  useEffect(() => {
+    setImageError(false);
+  }, [photoURL]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,8 +78,6 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ open, onClose }) =>
 
       alert('프로필이 업데이트되었습니다!');
       onClose();
-      // Refresh the page to show updated profile
-      window.location.reload();
     } catch (err) {
       console.error('프로필 업데이트 에러:', err);
       setError('프로필 업데이트에 실패했습니다. 다시 시도해주세요.');
@@ -95,8 +100,12 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ open, onClose }) =>
           {/* Preview */}
           <div className="profile-preview">
             <div className="preview-avatar">
-              {photoURL ? (
-                <img src={photoURL} alt="프로필 미리보기" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+              {photoURL && !imageError ? (
+                <img 
+                  src={photoURL} 
+                  alt="프로필 미리보기" 
+                  onError={() => setImageError(true)} 
+                />
               ) : (
                 <span className="preview-initial">{displayName.charAt(0).toUpperCase() || '?'}</span>
               )}
