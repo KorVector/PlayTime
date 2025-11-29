@@ -14,9 +14,9 @@ const StatsSection: React.FC = () => {
             <span className="highlight">PlayTime</span>에서 시작하세요
           </h2>
           <p className="stats-description">
-            좋아하는 영화에 대해 이야기하고, 새로운 영화를 발견하고,
-            같은 취향의 사람들과 연결되세요. PlayTime은 영화 팬들을 위한
-            최고의 소통 공간입니다.
+            좋아하는 영화에 대해 이야기하고, 새로운 영화를 발견하고,<br />
+            같은 취향의 사람들과 연결되세요.<br />
+            PlayTime은 영화 팬들을 위한 최고의 소통 공간입니다.
           </p>
           
           <div className="stats-numbers">

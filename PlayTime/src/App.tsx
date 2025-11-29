@@ -28,11 +28,11 @@ function HomePage({ onAuthRequired }: HomePageProps) {
   return (
     <>
       <HeroSection />
+      <StatsSection />
+      <FeaturesSection />
       <MovieCarousel title="취향을 알아가는 순간, 영화는 더 재미있어진다.">
         <MovieList onAuthRequired={onAuthRequired} />
       </MovieCarousel>
-      <FeaturesSection />
-      <StatsSection />
     </>
   );
 }
