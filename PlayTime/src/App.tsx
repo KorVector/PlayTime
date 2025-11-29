@@ -7,6 +7,7 @@ import MovieCarousel from './components/MovieCarousel';
 import MovieList from './components/MovieList';
 import FeaturesSection from './components/FeaturesSection';
 import StatsSection from './components/StatsSection';
+import HotTopicsSection from './components/HotTopicsSection';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import LikedModal from './components/LikedModal';
@@ -33,6 +34,7 @@ function HomePage({ onAuthRequired }: HomePageProps) {
       <MovieCarousel title="취향을 알아가는 순간, 영화는 더 재미있어진다.">
         <MovieList onAuthRequired={onAuthRequired} />
       </MovieCarousel>
+      <HotTopicsSection />
     </>
   );
 }
