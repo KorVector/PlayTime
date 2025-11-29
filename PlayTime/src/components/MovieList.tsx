@@ -1,5 +1,7 @@
-import { useEffect, useState, useMemo, memo } from 'react';
+import { useEffect, useState, useMemo, memo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
+import { doc, setDoc, deleteDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -13,14 +15,6 @@ interface TmdbMovie {
   overview?: string;
   release_date?: string;
   original_language?: string;
-}
-
-interface LikedItem {
-  id: number;
-  title?: string;
-  image?: string;
-  date?: string;
-  rating?: string;
 }
 
 import MovieCard from './MovieCard';
@@ -96,72 +90,61 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
   // pick 12 movies to display (computed once per `movies` change to avoid reshuffle on every render)
   const displayed = useMemo(() => getRandomMovies(movies, 12), [movies]);
 
-  const STORAGE_KEY = 'likedMovies';
+  // liked state
+  const [likedIds, setLikedIds] = useState<number[]>([]);
 
-  // Helper to read liked IDs from localStorage
-  const readLikedIdsFromStorage = (): number[] => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const parsed: LikedItem[] = raw ? JSON.parse(raw) : [];
-      return parsed.map((it) => it.id);
-    } catch {
-      return [];
-    }
-  };
-
-  // liked state (keep in memory to avoid reading localStorage on every render)
-  // Only load liked state for authenticated users
-  const [likedIds, setLikedIds] = useState<number[]>(() => {
-    if (!user) return [];
-    return readLikedIdsFromStorage();
-  });
-
-  // Update liked state when user changes
-  useEffect(() => {
+  // Load liked IDs from Firestore
+  const loadLikedIds = useCallback(async () => {
     if (!user) {
       setLikedIds([]);
       return;
     }
-    setLikedIds(readLikedIdsFromStorage());
+    
+    try {
+      const favoritesRef = collection(db, 'favorites', user.uid, 'movies');
+      const snapshot = await getDocs(favoritesRef);
+      const ids: number[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        ids.push(data.movieId);
+      });
+      setLikedIds(ids);
+    } catch (err) {
+      console.error('찜 목록 로딩 에러:', err);
+      setLikedIds([]);
+    }
   }, [user]);
+
+  // Load liked state when user changes
+  useEffect(() => {
+    loadLikedIds();
+  }, [loadLikedIds]);
 
   const isMovieLiked = (id: number) => likedIds.includes(id);
 
-  const syncLocalStorage = (items: LikedItem[]) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch (e) {
-      console.warn('localStorage 저장 실패', e);
-    }
-  };
-
-  const toggleLike = (movie: TmdbMovie, liked: boolean) => {
+  const toggleLike = async (movie: TmdbMovie, liked: boolean) => {
     // Defense in depth: ensure user is authenticated before modifying favorites
     if (!user) {
       return;
     }
     
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const current: LikedItem[] = raw ? JSON.parse(raw) : [];
-
+      const movieRef = doc(db, 'favorites', user.uid, 'movies', String(movie.id));
+      
       if (liked) {
-        const toAdd: LikedItem = {
-          id: movie.id,
+        // Add to Firestore
+        await setDoc(movieRef, {
+          movieId: movie.id,
           title: movie.title,
-          image: movie.poster_path ? `${IMAGE_BASE}${movie.poster_path}` : undefined,
-          date: movie.release_date,
+          image: movie.poster_path ? `${IMAGE_BASE}${movie.poster_path}` : '',
+          date: movie.release_date || '',
           rating: String(movie.vote_average),
-        };
-        const exists = current.some((it) => it.id === movie.id);
-        if (!exists) {
-          const updated = [toAdd, ...current];
-          syncLocalStorage(updated);
-          setLikedIds((s) => (s.includes(movie.id) ? s : [movie.id, ...s]));
-        }
+          addedAt: serverTimestamp(),
+        });
+        setLikedIds((s) => (s.includes(movie.id) ? s : [movie.id, ...s]));
       } else {
-        const filtered = current.filter((it) => it.id !== movie.id);
-        syncLocalStorage(filtered);
+        // Remove from Firestore
+        await deleteDoc(movieRef);
         setLikedIds((s) => s.filter((id) => id !== movie.id));
       }
     } catch (e) {
