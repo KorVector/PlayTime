@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useResponsive } from '../hooks/useResponsive';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/Header.css';
@@ -12,6 +12,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   const { isMobile } = useResponsive();
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -98,6 +99,21 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
     }
   };
 
+  const handleMyProfile = () => {
+    setIsDropdownOpen(false);
+    setIsMenuOpen(false);
+    navigate('/profile');
+  };
+
+  const handleUserSearch = () => {
+    setIsDropdownOpen(false);
+    setIsMenuOpen(false);
+    const openUserSearch = (window as Window & { openUserSearch?: () => void }).openUserSearch;
+    if (typeof openUserSearch === 'function') {
+      openUserSearch();
+    }
+  };
+
   return (
     <header className={`header ${isMobile ? 'mobile' : 'desktop'} ${!isVisible ? 'hidden' : ''}`}>
       <div className="header-container">
@@ -139,6 +155,12 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
                   <div className="profile-info">
                     <span className="profile-email">{user.email}</span>
                   </div>
+                  <button className="dropdown-item" onClick={handleMyProfile}>
+                    내 프로필
+                  </button>
+                  <button className="dropdown-item" onClick={handleUserSearch}>
+                    유저 검색
+                  </button>
                   <button className="dropdown-item logout-btn" onClick={handleLogout}>
                     로그아웃
                   </button>

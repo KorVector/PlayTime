@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
+import { collection, getDocs, doc, deleteDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import '../styles/LikedModal.css';
 
 interface LikedItem {
@@ -20,25 +22,109 @@ const STORAGE_KEY = 'likedMovies';
 const LikedModal: React.FC<LikedModalProps> = ({ open, onClose }) => {
   const { user } = useAuth();
   const [items, setItems] = useState<LikedItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [migrating, setMigrating] = useState(false);
+
+  // Migrate localStorage data to Firestore
+  const migrateToFirestore = useCallback(async () => {
+    if (!user) return;
+    
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    
+    try {
+      const localItems: LikedItem[] = JSON.parse(raw);
+      if (!localItems || localItems.length === 0) return;
+      
+      setMigrating(true);
+      
+      // Upload each item to Firestore
+      for (const item of localItems) {
+        const movieRef = doc(db, 'favorites', user.uid, 'movies', String(item.id));
+        await setDoc(movieRef, {
+          movieId: item.id,
+          title: item.title,
+          image: item.image || '',
+          date: item.date || '',
+          rating: String(item.rating || ''),
+          addedAt: serverTimestamp(),
+        }, { merge: true });
+      }
+      
+      // Clear localStorage after successful migration
+      localStorage.removeItem(STORAGE_KEY);
+      
+      setMigrating(false);
+    } catch (err) {
+      console.error('마이그레이션 에러:', err);
+      setMigrating(false);
+    }
+  }, [user]);
+
+  // Load favorites from Firestore
+  const loadFavorites = useCallback(async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const favoritesRef = collection(db, 'favorites', user.uid, 'movies');
+      const snapshot = await getDocs(favoritesRef);
+      const favoritesList: LikedItem[] = [];
+      
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        favoritesList.push({
+          id: data.movieId,
+          title: data.title,
+          image: data.image,
+          date: data.date,
+          rating: data.rating ? Number(data.rating) : undefined,
+        });
+      });
+      
+      setItems(favoritesList);
+    } catch (err) {
+      console.error('찜 목록 로딩 에러:', err);
+      // Fallback to localStorage if Firestore fails
+      const raw = localStorage.getItem(STORAGE_KEY);
+      try {
+        const parsed = raw ? JSON.parse(raw) : [];
+        setItems(parsed || []);
+      } catch {
+        setItems([]);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!open || !user) return;
-    const raw = localStorage.getItem(STORAGE_KEY);
-    try {
-      const parsed = raw ? JSON.parse(raw) : [];
-      setItems(parsed || []);
-    } catch {
-      setItems([]);
-    }
-  }, [open, user]);
+    
+    // First migrate localStorage data if any, then load from Firestore
+    const initFavorites = async () => {
+      await migrateToFirestore();
+      await loadFavorites();
+    };
+    
+    initFavorites();
+  }, [open, user, migrateToFirestore, loadFavorites]);
 
-  const removeItem = (id: number) => {
+  const removeItem = async (id: number) => {
+    if (!user) return;
+    
+    // Optimistically update UI
     const next = items.filter((i) => i.id !== id);
     setItems(next);
+    
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // ignore storage errors
+      // Remove from Firestore
+      const movieRef = doc(db, 'favorites', user.uid, 'movies', String(id));
+      await deleteDoc(movieRef);
+    } catch (err) {
+      console.error('삭제 에러:', err);
+      // Revert on error
+      setItems(items);
     }
   };
 
@@ -70,7 +156,11 @@ const LikedModal: React.FC<LikedModalProps> = ({ open, onClose }) => {
         </header>
 
         <div className="liked-modal-content">
-          {items.length === 0 && (
+          {(loading || migrating) && (
+            <p className="empty">{migrating ? '데이터 마이그레이션 중...' : '로딩 중...'}</p>
+          )}
+          
+          {!loading && !migrating && items.length === 0 && (
             <p className="empty">찜한 영화가 없습니다.</p>
           )}
 
