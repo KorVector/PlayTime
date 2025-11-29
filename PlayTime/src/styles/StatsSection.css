@@ -1,161 +1,393 @@
-/* 💡 한국 영화 순위 코드 */
+/* 💡 PlayTime 소개 섹션 */
 
 /* ========================================================== */
 
 .stats-section {
   position: relative;
   width: 100%;
-  padding: 100px 40px;
-  background: #0a0a14;
+  padding: 120px 40px;
+  background: linear-gradient(180deg, #0a0a14 0%, #0f0f1a 50%, #0a0a14 100%);
   box-sizing: border-box;
+  overflow: hidden;
 }
 
-.stats-container {
+.stats-content {
   display: flex;
-  justify-content: center;
-  gap: 60px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
   max-width: 1200px;
   margin: 0 auto;
+  gap: 80px;
+}
+
+.stats-text {
+  flex: 1;
+  max-width: 550px;
+}
+
+.stats-title {
+  font-size: 48px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  margin: 0 0 24px;
+}
+
+.stats-title .highlight {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.stats-description {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'DM Sans', sans-serif;
+  line-height: 1.7;
+  margin: 0 0 40px;
+}
+
+.stats-numbers {
+  display: flex;
+  align-items: center;
+  gap: 32px;
 }
 
 .stat-item {
-  position: relative;
-  text-align: center;
-  transition: transform 0.3s ease;
-}
-
-.stat-item:hover {
-  transform: translateY(-8px);
-}
-
-.stat-image {
-  width: 280px;
-  height: 400px;
-  object-fit: cover;
-  border-radius: 16px;
-  display: block;
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-  transition: box-shadow 0.3s ease, border-color 0.3s ease;
-}
-
-.stat-item:hover .stat-image {
-  border-color: rgba(139, 92, 246, 0.35);
-  box-shadow: 0 20px 60px rgba(139, 92, 246, 0.2);
-}
-
-.stat-value {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 28px;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
-  margin: 20px 0 0;
-  text-align: center;
-}
-
-.ranking-label-box {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
-  border: 1px solid rgba(139, 92, 246, 0.25);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 50px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  z-index: 10;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.ranking-label-text {
-  text-align: center;
+.stat-number {
+  font-size: 36px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
   background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  font-size: 18px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
   font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(139, 92, 246, 0.3);
+}
+
+/* 오른쪽 비주얼 영역 */
+.stats-visual {
+  flex: 1;
+  position: relative;
+  height: 400px;
+  max-width: 500px;
+}
+
+.main-visual {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.visual-circle {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.visual-circle::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  border-radius: 50%;
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  animation: pulse 3s ease-in-out infinite 0.5s;
+}
+
+.visual-circle::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: -40px;
+  right: -40px;
+  bottom: -40px;
+  border-radius: 50%;
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  animation: pulse 3s ease-in-out infinite 1s;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+.visual-icon {
+  font-size: 64px;
+  z-index: 1;
+  filter: drop-shadow(0 8px 24px rgba(139, 92, 246, 0.4));
+}
+
+/* 떠다니는 카드들 */
+.floating-card {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: float 4s ease-in-out infinite;
+}
+
+.floating-card .card-emoji {
+  font-size: 24px;
+}
+
+.floating-card .card-text {
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
   white-space: nowrap;
-  padding: 0 20px;
+}
+
+.card-1 {
+  top: 20px;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.card-2 {
+  top: 40%;
+  right: 5%;
+  animation-delay: 1s;
+}
+
+.card-3 {
+  bottom: 40px;
+  left: 20%;
+  animation-delay: 2s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
 }
 
 /* 태블릿 (641px - 1024px) */
 @media (max-width: 1024px) and (min-width: 641px) {
   .stats-section {
-    padding: 60px 30px;
+    padding: 80px 30px;
   }
 
-  .stats-container {
+  .stats-content {
     gap: 50px;
   }
 
-  .stat-image {
-    width: 250px;
-    height: 350px;
+  .stats-title {
+    font-size: 36px;
   }
 
-  .stat-value {
-    font-size: 28px;
-    margin-top: 15px;
-  }
-
-  .ranking-label-text {
+  .stats-description {
     font-size: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stats-numbers {
+    gap: 24px;
+  }
+
+  .stat-number {
+    font-size: 28px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .stats-visual {
+    height: 350px;
+    max-width: 400px;
+  }
+
+  .main-visual {
+    width: 160px;
+    height: 160px;
+  }
+
+  .visual-icon {
+    font-size: 48px;
+  }
+
+  .floating-card {
+    padding: 12px 16px;
+  }
+
+  .floating-card .card-emoji {
+    font-size: 20px;
+  }
+
+  .floating-card .card-text {
+    font-size: 12px;
   }
 }
 
 /* 모바일 (max-width: 640px) */
 @media (max-width: 640px) {
   .stats-section {
-    padding: 50px 20px;
+    padding: 60px 20px;
   }
 
-  .stats-container {
-    gap: 30px;
+  .stats-content {
     flex-direction: column;
-    align-items: center;
+    gap: 50px;
+    text-align: center;
   }
 
-  .stat-image {
-    width: 200px;
-    height: 280px;
+  .stats-text {
+    max-width: 100%;
   }
 
-  .stat-value {
-    font-size: 22px;
-    margin-top: 12px;
+  .stats-title {
+    font-size: 28px;
   }
 
-  .ranking-label-text {
+  .stats-title br {
+    display: none;
+  }
+
+  .stats-description {
     font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  .stats-numbers {
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .stat-number {
+    font-size: 24px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .stat-divider {
+    height: 30px;
+  }
+
+  .stats-visual {
+    width: 100%;
+    height: 280px;
+    max-width: 320px;
+  }
+
+  .main-visual {
+    width: 120px;
+    height: 120px;
+  }
+
+  .visual-icon {
+    font-size: 40px;
+  }
+
+  .floating-card {
+    padding: 10px 14px;
+    border-radius: 12px;
+  }
+
+  .floating-card .card-emoji {
+    font-size: 18px;
+  }
+
+  .floating-card .card-text {
+    font-size: 11px;
+  }
+
+  .card-1 {
+    top: 10px;
+    left: 5%;
+  }
+
+  .card-2 {
+    top: 35%;
+    right: 0;
+  }
+
+  .card-3 {
+    bottom: 20px;
+    left: 15%;
   }
 }
 
 /* 초소형 모바일 (max-width: 360px) */
 @media (max-width: 360px) {
   .stats-section {
-    padding: 40px 15px;
+    padding: 50px 16px;
   }
 
-  .stats-container {
-    gap: 20px;
+  .stats-title {
+    font-size: 24px;
   }
 
-  .stat-image {
-    width: 160px;
-    height: 220px;
+  .stats-description {
+    font-size: 13px;
   }
 
-  .stat-value {
-    font-size: 18px;
-    margin-top: 10px;
+  .stats-numbers {
+    gap: 16px;
   }
 
-  .ranking-label-text {
-    font-size: 12px;
+  .stat-number {
+    font-size: 20px;
+  }
+
+  .stats-visual {
+    height: 240px;
+  }
+
+  .main-visual {
+    width: 100px;
+    height: 100px;
+  }
+
+  .visual-icon {
+    font-size: 32px;
   }
 }
