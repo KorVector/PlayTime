@@ -21,10 +21,9 @@ import MovieCard from './MovieCard';
 
 interface MovieListProps {
   onAuthRequired?: () => void;
-  onMovieClick?: (movieId: number) => void;
 }
 
-function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
+function MovieList({ onAuthRequired }: MovieListProps) {
   const { user } = useAuth();
   const [movies, setMovies] = useState<TmdbMovie[]>([]);
   const [loading, setLoading] = useState(false);
@@ -41,31 +40,11 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
       setError(null);
 
       try {
-        // 여러 페이지와 카테고리에서 영화 가져오기
-        const endpoints = [
-          `${BASE_URL}/movie/popular?language=ko-KR&page=1&api_key=${API_KEY}`,
-          `${BASE_URL}/movie/popular?language=ko-KR&page=2&api_key=${API_KEY}`,
-          `${BASE_URL}/movie/now_playing?language=ko-KR&page=1&api_key=${API_KEY}`,
-          `${BASE_URL}/movie/top_rated?language=ko-KR&page=1&api_key=${API_KEY}`,
-        ];
-
-        const responses = await Promise.all(endpoints.map(url => fetch(url)));
-        const dataArray = await Promise.all(responses.map(res => res.json()));
-        
-        // 모든 영화를 합치고 중복 제거
-        const allMovies: TmdbMovie[] = [];
-        const seenIds = new Set<number>();
-        
-        dataArray.forEach(data => {
-          (data.results || []).forEach((movie: TmdbMovie) => {
-            if (!seenIds.has(movie.id)) {
-              seenIds.add(movie.id);
-              allMovies.push(movie);
-            }
-          });
-        });
-
-        setMovies(allMovies);
+        const url = `${BASE_URL}/movie/popular?language=ko-KR&page=1&api_key=${API_KEY}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        setMovies(data.results || []);
       } catch (err: unknown) {
         console.error(err);
         setError('영화 데이터를 불러오는 중 오류가 발생했습니다. 콘솔을 확인하세요.');
@@ -77,8 +56,8 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
     fetchMovies();
   }, []);
 
-  // helper: shuffle and pick up to N movies (default 12)
-  const getRandomMovies = (arr: TmdbMovie[], count = 12) => {
+  // helper: shuffle and pick up to N movies (default 7)
+  const getRandomMovies = (arr: TmdbMovie[], count = 7) => {
     const copy = arr.slice();
     for (let i = copy.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -87,8 +66,8 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
     return copy.slice(0, Math.min(count, copy.length));
   };
 
-  // pick 12 movies to display (computed once per `movies` change to avoid reshuffle on every render)
-  const displayed = useMemo(() => getRandomMovies(movies, 12), [movies]);
+  // pick 7 movies to display (computed once per `movies` change to avoid reshuffle on every render)
+  const displayed = useMemo(() => getRandomMovies(movies, 7), [movies]);
 
   // liked state
   const [likedIds, setLikedIds] = useState<number[]>([]);
@@ -172,7 +151,6 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
           isLiked={isMovieLiked(m.id)}
           isAuthenticated={!!user}
           onAuthRequired={onAuthRequired}
-          onMovieClick={onMovieClick}
         />
       ))}
 
