@@ -72,6 +72,7 @@ interface MovieCardProps {
   isLiked?: boolean;
   isAuthenticated?: boolean;
   onAuthRequired?: () => void;
+  onMovieClick?: (movieId: number) => void;
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({
@@ -85,6 +86,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
   isLiked: initialLiked = false,
   isAuthenticated = false,
   onAuthRequired,
+  onMovieClick,
 }) => {
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(initialLiked);
@@ -112,8 +114,16 @@ const MovieCard: React.FC<MovieCardProps> = ({
     }
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // 버튼 클릭시에는 카드 클릭 이벤트 무시
+    if ((e.target as HTMLElement).closest('button')) return;
+    if (id && onMovieClick) {
+      onMovieClick(id);
+    }
+  };
+
   return (
-    <div className="movie-card">
+    <div className="movie-card" onClick={handleCardClick} style={{ cursor: onMovieClick ? 'pointer' : 'default' }}>
       <img src={image} alt={title} className="movie-image" />
       <div className="movie-overlay"></div>
       
