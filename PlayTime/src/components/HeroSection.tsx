@@ -29,7 +29,11 @@ import React from 'react';
 import { useResponsive } from '../hooks/useResponsive';
 import '../styles/HeroSection.css';
 
-const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+  onRecommendClick?: () => void;
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({ onRecommendClick }) => {
   const { isMobile, isTablet } = useResponsive();
 
   return (
@@ -48,7 +52,7 @@ const HeroSection: React.FC = () => {
           {!isMobile && '사용자 채팅방을 통해 사람들과 영화를 추천받고 추천받는 혁신적인 서비스를 제공합니다.'}
           {isMobile && <span>사용자 채팅방을 통해 영화를 추천받는 서비스</span>}
         </p>
-        <button className="hero-btn">
+        <button className="hero-btn" onClick={onRecommendClick}>
           {isMobile ? '추천 받으러 가기' : '영화 추천 받으러 가기'}
         </button>
       </div>
