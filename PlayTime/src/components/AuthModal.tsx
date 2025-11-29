@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import '../styles/AuthModal.css';
 // 1. Firebase 도구들을 가져옵니다.
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 interface AuthModalProps {
   open: boolean;
@@ -31,6 +32,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
           displayName: name,
         });
 
+        // (3) Firestore에 사용자 문서 생성
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          displayName: name,
+          email: email,
+          photoURL: null,
+          bio: '',
+          createdAt: serverTimestamp(),
+        });
+
         alert(`환영합니다, ${name}님! 회원가입 성공! 🎉`);
         onClose(); // 모달 닫기
 
@@ -41,21 +51,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
         alert(`로그인 되었습니다!`);
         onClose(); // 모달 닫기
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // 4. 에러 처리 (실패했을 때)
       console.error("에러 발생:", error);
       
       // 친절한 에러 메시지 보여주기
-      if (error.code === 'auth/email-already-in-use') {
+      const firebaseError = error as { code?: string; message?: string };
+      if (firebaseError.code === 'auth/email-already-in-use') {
         alert('이미 사용 중인 이메일입니다.');
-      } else if (error.code === 'auth/invalid-email') {
+      } else if (firebaseError.code === 'auth/invalid-email') {
         alert('이메일 형식이 올바르지 않습니다.');
-      } else if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+      } else if (firebaseError.code === 'auth/wrong-password' || firebaseError.code === 'auth/user-not-found') {
         alert('이메일 혹은 비밀번호가 일치하지 않습니다.');
-      } else if (error.code === 'auth/weak-password') {
+      } else if (firebaseError.code === 'auth/weak-password') {
         alert('비밀번호는 6자리 이상이어야 합니다.');
       } else {
-        alert('로그인/회원가입 실패: ' + error.message);
+        alert('로그인/회원가입 실패: ' + (firebaseError.message || '알 수 없는 오류'));
       }
     }
   };
