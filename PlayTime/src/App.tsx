@@ -11,6 +11,8 @@ import HotTopicsSection from './components/HotTopicsSection';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import LikedModal from './components/LikedModal';
+import MovieRecommendModal from './components/MovieRecommendModal';
+import MovieDetailModal from './components/MovieDetailModal';
 import ProfileEditModal from './components/ProfileEditModal';
 import UserSearchModal from './components/UserSearchModal';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -26,16 +28,18 @@ import './App.css';
 
 interface HomePageProps {
   onAuthRequired: () => void;
+  onRecommendClick: () => void;
+  onMovieClick: (movieId: number) => void;
 }
 
-function HomePage({ onAuthRequired }: HomePageProps) {
+function HomePage({ onAuthRequired, onRecommendClick, onMovieClick }: HomePageProps) {
   return (
     <>
-      <HeroSection />
+      <HeroSection onRecommendClick={onRecommendClick} />
       <StatsSection />
       <FeaturesSection />
       <MovieCarousel title="취향을 알아가는 순간, 영화는 더 재미있어진다.">
-        <MovieList onAuthRequired={onAuthRequired} />
+        <MovieList onAuthRequired={onAuthRequired} onMovieClick={onMovieClick} />
       </MovieCarousel>
       <HotTopicsSection />
     </>
@@ -45,6 +49,9 @@ function HomePage({ onAuthRequired }: HomePageProps) {
 function App() {
   const [authOpen, setAuthOpen] = useState(false);
   const [likedOpen, setLikedOpen] = useState(false);
+  const [recommendOpen, setRecommendOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
   const [profileEditOpen, setProfileEditOpen] = useState(false);
   const [userSearchOpen, setUserSearchOpen] = useState(false);
 
@@ -58,6 +65,11 @@ function App() {
   (window as typeof window & { openUserSearch?: () => void }).openUserSearch = () => setUserSearchOpen(true);
 
   const handleAuthRequired = () => setAuthOpen(true);
+  const handleRecommendClick = () => setRecommendOpen(true);
+  const handleMovieClick = (movieId: number) => {
+    setSelectedMovieId(movieId);
+    setDetailOpen(true);
+  };
 
   return (
     <AuthProvider>
@@ -66,11 +78,13 @@ function App() {
           <Header onLoginClick={() => setAuthOpen(true)} onShowLiked={() => setLikedOpen(true)} />
           <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
           <LikedModal open={likedOpen} onClose={() => setLikedOpen(false)} />
+          <MovieRecommendModal open={recommendOpen} onClose={() => setRecommendOpen(false)} />
+          <MovieDetailModal open={detailOpen} onClose={() => setDetailOpen(false)} movieId={selectedMovieId} />
           <ProfileEditModal open={profileEditOpen} onClose={() => setProfileEditOpen(false)} />
           <UserSearchModal open={userSearchOpen} onClose={() => setUserSearchOpen(false)} />
           
           <Routes>
-            <Route path="/" element={<HomePage onAuthRequired={handleAuthRequired} />} />
+            <Route path="/" element={<HomePage onAuthRequired={handleAuthRequired} onRecommendClick={handleRecommendClick} onMovieClick={handleMovieClick} />} />
             <Route path="/live-chat" element={<ProtectedRoute><LiveChatRoom /></ProtectedRoute>} />
             <Route path="/chat-main" element={<ProtectedRoute><ChatMainPage /></ProtectedRoute>} />
             <Route path="/movie-chat-list" element={<ProtectedRoute><MovieChatListPage /></ProtectedRoute>} />
