@@ -11,13 +11,10 @@ import HotTopicsSection from './components/HotTopicsSection';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import LikedModal from './components/LikedModal';
-<<<<<<< HEAD
 import ProfileEditModal from './components/ProfileEditModal';
 import UserSearchModal from './components/UserSearchModal';
-=======
 import MovieRecommendModal from './components/MovieRecommendModal';
 import MovieDetailModal from './components/MovieDetailModal';
->>>>>>> a712cce (영화 클릭 시 상세정보 모달 기능 추가)
 import ProtectedRoute from './components/ProtectedRoute';
 import LiveChatRoom from './pages/LiveChatRoom';
 import ChatMainPage from './pages/ChatMainPage';
@@ -52,14 +49,11 @@ function HomePage({ onAuthRequired, onRecommendClick, onMovieClick }: HomePagePr
 function App() {
   const [authOpen, setAuthOpen] = useState(false);
   const [likedOpen, setLikedOpen] = useState(false);
-<<<<<<< HEAD
   const [profileEditOpen, setProfileEditOpen] = useState(false);
   const [userSearchOpen, setUserSearchOpen] = useState(false);
-=======
   const [recommendOpen, setRecommendOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
->>>>>>> a712cce (영화 클릭 시 상세정보 모달 기능 추가)
 
   // expose a small global helper so Header can open the liked modal without prop-drilling
   (window as typeof window & { openLiked?: () => void; openAuth?: () => void }).openLiked = () => setLikedOpen(true);
@@ -84,13 +78,10 @@ function App() {
           <Header onLoginClick={() => setAuthOpen(true)} onShowLiked={() => setLikedOpen(true)} />
           <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
           <LikedModal open={likedOpen} onClose={() => setLikedOpen(false)} />
-<<<<<<< HEAD
           <ProfileEditModal open={profileEditOpen} onClose={() => setProfileEditOpen(false)} />
           <UserSearchModal open={userSearchOpen} onClose={() => setUserSearchOpen(false)} />
-=======
           <MovieRecommendModal open={recommendOpen} onClose={() => setRecommendOpen(false)} />
           <MovieDetailModal open={detailOpen} onClose={() => setDetailOpen(false)} movieId={selectedMovieId} />
->>>>>>> a712cce (영화 클릭 시 상세정보 모달 기능 추가)
           
           <Routes>
             <Route path="/" element={<HomePage onAuthRequired={handleAuthRequired} onRecommendClick={handleRecommendClick} onMovieClick={handleMovieClick} />} />
