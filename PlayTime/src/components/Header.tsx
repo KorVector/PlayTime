@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useResponsive } from '../hooks/useResponsive';
 import { useAuth } from '../contexts/AuthContext';
@@ -26,10 +26,14 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   const ticking = useRef(false);
   const location = useLocation();
 
+  // spacer 높이(헤더가 fixed이므로 문서 흐름 밀림 방지용)
+  const [spacerHeight, setSpacerHeight] = useState<number>(0);
+
   // Detect if current page is a chat-related page
-  const isChatPage = ['/live-chat', '/chat-main', '/movie-chat-list', '/genres'].some(
-    path => location.pathname.startsWith(path)
-  ) || location.pathname.includes('/board') || location.pathname.includes('/post/');
+  const isChatPage =
+    ['/live-chat', '/chat-main', '/movie-chat-list', '/genres'].some((path) =>
+      location.pathname.startsWith(path)
+    ) || location.pathname.includes('/board') || location.pathname.includes('/post/');
 
   // 프로필 이니셜 (displayName 또는 email의 첫 글자)
   const getInitial = () => {
@@ -61,6 +65,21 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
     };
   }, []);
 
+  // 헤더의 실제 높이를 측정해서 spacer에 반영
+  useLayoutEffect(() => {
+    const measure = () => {
+      const h = headerRef.current ? headerRef.current.offsetHeight : 0;
+      setSpacerHeight(h);
+    };
+
+    // 최초 측정
+    measure();
+
+    // 리사이즈 시 재측정
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+
   // Scroll-based header hide/show behavior with RAF throttling
   useEffect(() => {
     // Skip scroll behavior on chat pages - they have their own mouse-based logic
@@ -70,7 +89,6 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
       const scrollDelta = currentScrollY - lastScrollY.current;
 
       // Keep header visible if dropdown is open or menu is open
-      // Note: We skip focus check here to avoid DOM query on every scroll frame
       if (isDropdownOpen || isMenuOpen) {
         setIsVisible(true);
         lastScrollY.current = currentScrollY;
@@ -116,11 +134,14 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
       }
     };
 
+    // initialize lastScrollY to current value to avoid jump on first scroll
+    lastScrollY.current = typeof window !== 'undefined' ? window.scrollY : 0;
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isChatPage, isDropdownOpen, isMenuOpen]);
 
-  // 채팅 페이지에서 Header 자동 숨김/표시 기능 (마우스 기반)
+  // 채팅 페이지에서 Header 자동 숨김/표시 기능 (마우스 기반) — 기존 동작 유지
   useEffect(() => {
     if (!isChatPage) {
       setIsVisible(true);
@@ -181,64 +202,83 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   };
 
   return (
-    <header ref={headerRef} className={`header ${isMobile ? 'mobile' : 'desktop'} ${!isVisible ? 'hidden' : ''}`}>
-      <div className="header-container">
-        <div className="logo">
-          <span className="logo-gradient">PlayTime</span>
-        </div>
-        
-        {isMobile && (
-          <button 
-            className="menu-toggle"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="메뉴 토글"
-          >
-            ☰
-          </button>
-        )}
+    <>
+      <header
+        ref={headerRef}
+        className={`header ${isMobile ? 'mobile' : 'desktop'} ${!isVisible ? 'hidden' : ''}`}
+        aria-hidden={!isVisible}
+      >
+        <div className="header-container">
+          <div className="logo">
+            <span className="logo-gradient">PlayTime</span>
+          </div>
 
-        <nav className={`nav-menu ${isMenuOpen ? 'open' : ''}`}>
-          <button className="nav-item">알림</button>
-          <button className="nav-item" onClick={handleOpenLiked}>MY 찜 보기</button>
-          
-          {user ? (
-            <div className="profile-container" ref={dropdownRef}>
-              <button 
-                className="profile-btn" 
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                aria-label="프로필 메뉴"
-              >
-                {user.photoURL ? (
-                  <img src={user.photoURL} alt="프로필" className="profile-image" />
-                ) : (
-                  <span className="profile-initial">{getInitial()}</span>
-                )}
-                <span className="profile-name">{getDisplayName()}</span>
-              </button>
-              
-              {isDropdownOpen && (
-                <div className="profile-dropdown">
-                  <div className="profile-info">
-                    <span className="profile-email">{user.email}</span>
-                  </div>
-                  <button className="dropdown-item" onClick={handleMyProfile}>
-                    내 프로필
-                  </button>
-                  <button className="dropdown-item" onClick={handleUserSearch}>
-                    유저 검색
-                  </button>
-                  <button className="dropdown-item logout-btn" onClick={handleLogout}>
-                    로그아웃
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <button className="nav-item login-btn" onClick={() => { onLoginClick?.(); setIsMenuOpen(false); }}>로그인</button>
+          {isMobile && (
+            <button
+              className="menu-toggle"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="메뉴 토글"
+            >
+              ☰
+            </button>
           )}
-        </nav>
-      </div>
-    </header>
+
+          <nav className={`nav-menu ${isMenuOpen ? 'open' : ''}`}>
+            <button className="nav-item">알림</button>
+            <button className="nav-item" onClick={handleOpenLiked}>
+              MY 찜 보기
+            </button>
+
+            {user ? (
+              <div className="profile-container" ref={dropdownRef}>
+                <button
+                  className="profile-btn"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  aria-label="프로필 메뉴"
+                >
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt="프로필" className="profile-image" />
+                  ) : (
+                    <span className="profile-initial">{getInitial()}</span>
+                  )}
+                  <span className="profile-name">{getDisplayName()}</span>
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="profile-dropdown">
+                    <div className="profile-info">
+                      <span className="profile-email">{user.email}</span>
+                    </div>
+                    <button className="dropdown-item" onClick={handleMyProfile}>
+                      내 프로필
+                    </button>
+                    <button className="dropdown-item" onClick={handleUserSearch}>
+                      유저 검색
+                    </button>
+                    <button className="dropdown-item logout-btn" onClick={handleLogout}>
+                      로그아웃
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                className="nav-item login-btn"
+                onClick={() => {
+                  onLoginClick?.();
+                  setIsMenuOpen(false);
+                }}
+              >
+                로그인
+              </button>
+            )}
+          </nav>
+        </div>
+      </header>
+
+      {/* 헤더가 position:fixed이므로 문서 흐름 유지를 위해 spacer를 둠 */}
+      <div style={{ height: spacerHeight }} aria-hidden="true" />
+    </>
   );
 };
 
