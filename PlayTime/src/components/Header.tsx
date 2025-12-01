@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useResponsive } from '../hooks/useResponsive';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,6 +23,7 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
   const lastScrollY = useRef(0);
+  const ticking = useRef(false);
   const location = useLocation();
 
   // Detect if current page is a chat-related page
@@ -60,26 +61,17 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
     };
   }, []);
 
-  // Check if focus is inside header
-  const isFocusInsideHeader = useCallback(() => {
-    if (!headerRef.current) return false;
-    return headerRef.current.contains(document.activeElement);
-  }, []);
-
-  // Scroll-based header hide/show behavior
+  // Scroll-based header hide/show behavior with RAF throttling
   useEffect(() => {
     // Skip scroll behavior on chat pages - they have their own mouse-based logic
     if (isChatPage) return;
 
-    const handleScroll = () => {
-      // Skip if we're in SSR or window is not available
-      if (typeof window === 'undefined') return;
-
-      const currentScrollY = window.scrollY;
+    const updateHeader = (currentScrollY: number) => {
       const scrollDelta = currentScrollY - lastScrollY.current;
 
-      // Keep header visible if dropdown is open, menu is open, or focus is inside header
-      if (isDropdownOpen || isMenuOpen || isFocusInsideHeader()) {
+      // Keep header visible if dropdown is open or menu is open
+      // Note: We skip focus check here to avoid DOM query on every scroll frame
+      if (isDropdownOpen || isMenuOpen) {
         setIsVisible(true);
         lastScrollY.current = currentScrollY;
         return;
@@ -109,9 +101,24 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
       lastScrollY.current = currentScrollY;
     };
 
+    const handleScroll = () => {
+      // Skip if we're in SSR or window is not available
+      if (typeof window === 'undefined') return;
+
+      // Use requestAnimationFrame for throttling
+      if (!ticking.current) {
+        const currentScrollY = window.scrollY;
+        window.requestAnimationFrame(() => {
+          updateHeader(currentScrollY);
+          ticking.current = false;
+        });
+        ticking.current = true;
+      }
+    };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isChatPage, isDropdownOpen, isMenuOpen, isFocusInsideHeader]);
+  }, [isChatPage, isDropdownOpen, isMenuOpen]);
 
   // 채팅 페이지에서 Header 자동 숨김/표시 기능 (마우스 기반)
   useEffect(() => {
