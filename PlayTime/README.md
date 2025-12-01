@@ -14,6 +14,16 @@ The following features require user authentication (login):
 - **MY 찜 보기 (View Favorites)**: Viewing the favorites list requires authentication. Clicking this button while not logged in will prompt the user to log in.
 - **채팅 (Chat)**: All chat-related features require authentication.
 
+### Header Behavior
+
+The header component has scroll-based visibility:
+
+- **Scroll Down**: When the user scrolls down past 50px, the header will hide automatically.
+- **Scroll Up**: When the user scrolls up, the header will reappear.
+- **Dropdown/Menu Open**: The header stays visible when the dropdown menu or mobile menu is open.
+- **Focus Inside Header**: The header stays visible when focus is inside the header area.
+- **Chat Pages**: On chat-related pages, the header uses mouse-based visibility instead (showing when mouse is near the top of the screen).
+
 ## Deploy Your Own
 
 Deploy your own Vite project with Vercel.

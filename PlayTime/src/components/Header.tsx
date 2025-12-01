@@ -9,6 +9,10 @@ interface HeaderProps {
   onShowLiked?: () => void;
 }
 
+// Constants for scroll behavior
+const SCROLL_THRESHOLD = 50; // Minimum scroll position before hide/show kicks in
+const SCROLL_DELTA = 5; // Minimum scroll change to trigger hide/show
+
 const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   const { isMobile } = useResponsive();
   const { user, logout } = useAuth();
@@ -17,6 +21,9 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
   const location = useLocation();
 
   // Detect if current page is a chat-related page
@@ -54,7 +61,66 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
     };
   }, []);
 
-  // 채팅 페이지에서 Header 자동 숨김/표시 기능
+  // Scroll-based header hide/show behavior with RAF throttling
+  useEffect(() => {
+    // Skip scroll behavior on chat pages - they have their own mouse-based logic
+    if (isChatPage) return;
+
+    const updateHeader = (currentScrollY: number) => {
+      const scrollDelta = currentScrollY - lastScrollY.current;
+
+      // Keep header visible if dropdown is open or menu is open
+      // Note: We skip focus check here to avoid DOM query on every scroll frame
+      if (isDropdownOpen || isMenuOpen) {
+        setIsVisible(true);
+        lastScrollY.current = currentScrollY;
+        return;
+      }
+
+      // Don't hide/show if scroll delta is too small (prevents iOS bounce issues)
+      if (Math.abs(scrollDelta) < SCROLL_DELTA) {
+        return;
+      }
+
+      // Don't hide if we're near the top of the page
+      if (currentScrollY < SCROLL_THRESHOLD) {
+        setIsVisible(true);
+        lastScrollY.current = currentScrollY;
+        return;
+      }
+
+      // Hide on scroll down, show on scroll up
+      if (scrollDelta > 0) {
+        // Scrolling down
+        setIsVisible(false);
+      } else {
+        // Scrolling up
+        setIsVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    const handleScroll = () => {
+      // Skip if we're in SSR or window is not available
+      if (typeof window === 'undefined') return;
+
+      // Use requestAnimationFrame for throttling
+      if (!ticking.current) {
+        const currentScrollY = window.scrollY;
+        window.requestAnimationFrame(() => {
+          updateHeader(currentScrollY);
+          ticking.current = false;
+        });
+        ticking.current = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isChatPage, isDropdownOpen, isMenuOpen]);
+
+  // 채팅 페이지에서 Header 자동 숨김/표시 기능 (마우스 기반)
   useEffect(() => {
     if (!isChatPage) {
       setIsVisible(true);
@@ -115,7 +181,7 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   };
 
   return (
-    <header className={`header ${isMobile ? 'mobile' : 'desktop'} ${!isVisible ? 'hidden' : ''}`}>
+    <header ref={headerRef} className={`header ${isMobile ? 'mobile' : 'desktop'} ${!isVisible ? 'hidden' : ''}`}>
       <div className="header-container">
         <div className="logo">
           <span className="logo-gradient">PlayTime</span>
