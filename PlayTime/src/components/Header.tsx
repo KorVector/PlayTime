@@ -141,18 +141,17 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isChatPage, isDropdownOpen, isMenuOpen]);
 
-  // 채팅 페이지에서 Header 자동 숨김/표시 기능 (마우스 기반) — 기존 동작 유지
+  // 채팅 페이지 전용: 마우스 위치 기반 헤더 숨김/표시
   useEffect(() => {
+    // 메인 화면에서는 이 로직 사용 안함 - 스크롤 로직에서 관리
     if (!isChatPage) {
-      setIsVisible(true);
       return;
     }
 
-    // 채팅 페이지에서는 기본적으로 숨김
+    // 채팅 페이지에서는 기본적으로 헤더 숨김
     setIsVisible(false);
 
     const handleMouseMove = (e: MouseEvent) => {
-      // 마우스가 화면 상단 50px 이내에 있으면 표시
       if (e.clientY < 50) {
         setIsVisible(true);
       } else {
