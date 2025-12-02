@@ -138,6 +138,13 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleMovieClick = (movieId: number) => {
+    const openMovieDetail = (window as Window & { openMovieDetail?: (movieId: number) => void }).openMovieDetail;
+    if (typeof openMovieDetail === 'function') {
+      openMovieDetail(movieId);
+    }
+  };
+
   const getRoomTypeLabel = (type: string) => {
     switch (type) {
       case 'movie': return '영화';
@@ -212,7 +219,12 @@ const ProfilePage: React.FC = () => {
           ) : (
             <div className="favorites-grid">
               {favorites.map((movie) => (
-                <div key={movie.movieId} className="favorite-card">
+                <div 
+                  key={movie.movieId} 
+                  className="favorite-card"
+                  onClick={() => handleMovieClick(movie.movieId)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <img 
                     src={movie.image || 'https://placehold.co/120x180'} 
                     alt={movie.title}
