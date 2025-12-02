@@ -63,6 +63,11 @@ function App() {
   (window as typeof window & { openProfileEdit?: () => void }).openProfileEdit = () => setProfileEditOpen(true);
   // expose user search modal opener
   (window as typeof window & { openUserSearch?: () => void }).openUserSearch = () => setUserSearchOpen(true);
+  // expose movie detail modal opener
+  (window as typeof window & { openMovieDetail?: (movieId: number) => void }).openMovieDetail = (movieId: number) => {
+    setSelectedMovieId(movieId);
+    setDetailOpen(true);
+  };
 
   const handleAuthRequired = () => setAuthOpen(true);
   const handleRecommendClick = () => setRecommendOpen(true);
