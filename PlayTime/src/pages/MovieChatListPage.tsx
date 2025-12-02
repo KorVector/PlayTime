@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useResponsive } from '../hooks/useResponsive';
 import MovieCard from '../components/MovieCard';
+import MovieDetailModal from '../components/MovieDetailModal';
 import '../styles/MovieChatListPage.css';
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -24,6 +25,8 @@ const MovieChatListPage: React.FC = () => {
   const [movies, setMovies] = useState<TmdbMovie[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -41,7 +44,7 @@ const MovieChatListPage: React.FC = () => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setMovies(data.results || []);
-      } catch (err: any) {
+      } catch (err) {
         console.error(err);
         setError('영화 데이터를 불러오는 중 오류가 발생했습니다.');
       } finally {
@@ -51,6 +54,11 @@ const MovieChatListPage: React.FC = () => {
 
     fetchMovies();
   }, []);
+
+  const handleMovieClick = (movieId: number) => {
+    setSelectedMovieId(movieId);
+    setDetailOpen(true);
+  };
 
   return (
     <div className={`movie-chat-list-page ${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'}`}>
@@ -76,6 +84,7 @@ const MovieChatListPage: React.FC = () => {
               title={movie.title}
               date={movie.release_date || ''}
               rating={String(movie.vote_average)}
+              onMovieClick={handleMovieClick}
             />
           ))}
         </div>
@@ -84,6 +93,12 @@ const MovieChatListPage: React.FC = () => {
           <p className="no-data-text">데이터가 없습니다.</p>
         )}
       </div>
+
+      <MovieDetailModal 
+        open={detailOpen} 
+        onClose={() => setDetailOpen(false)} 
+        movieId={selectedMovieId} 
+      />
     </div>
   );
 };
