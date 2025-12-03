@@ -10,7 +10,7 @@ const ChatMainPage: React.FC = () => {
   const menuItems = [
     {
       id: 1,
-      title: '영화별 채팅방',
+      title: '영화별 게시판',
       description: '좋아하는 영화에 대해 이야기해보세요',
       icon: '🎬',
       path: '/movie-chat-list',
