@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import '../styles/ProfilePage.css';
 
 interface UserProfile {
@@ -22,11 +22,11 @@ interface FavoriteMovie {
   addedAt?: Date;
 }
 
-interface ChatMembership {
-  roomId: string;
-  roomType: 'movie' | 'genre' | 'live';
-  roomName: string;
-  joinedAt?: Date;
+interface ParticipatedPost {
+  postId: string;
+  postTitle: string;
+  type: 'author' | 'commenter';
+  createdAt?: Date;
 }
 
 const ProfilePage: React.FC = () => {
@@ -36,7 +36,7 @@ const ProfilePage: React.FC = () => {
   
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [favorites, setFavorites] = useState<FavoriteMovie[]>([]);
-  const [chatMemberships, setChatMemberships] = useState<ChatMembership[]>([]);
+  const [participatedPosts, setParticipatedPosts] = useState<ParticipatedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -101,20 +101,59 @@ const ProfilePage: React.FC = () => {
         });
         setFavorites(favoritesList);
 
-        // Fetch chat memberships
-        const membershipsRef = collection(db, 'chatMemberships', targetUserId, 'rooms');
-        const membershipsSnapshot = await getDocs(membershipsRef);
-        const membershipsList: ChatMembership[] = [];
-        membershipsSnapshot.forEach((doc) => {
+        // Fetch posts authored by user
+        const postsRef = collection(db, 'posts');
+        const authorPostsQuery = query(postsRef, where('authorId', '==', targetUserId));
+        const authorPostsSnapshot = await getDocs(authorPostsQuery);
+        
+        const participatedList: ParticipatedPost[] = [];
+        const addedPostIds = new Set<string>();
+        
+        authorPostsSnapshot.forEach((doc) => {
           const data = doc.data();
-          membershipsList.push({
-            roomId: data.roomId,
-            roomType: data.roomType,
-            roomName: data.roomName,
-            joinedAt: data.joinedAt?.toDate(),
+          participatedList.push({
+            postId: doc.id,
+            postTitle: data.title,
+            type: 'author',
+            createdAt: data.createdAt?.toDate(),
           });
+          addedPostIds.add(doc.id);
         });
-        setChatMemberships(membershipsList);
+
+        // Fetch comments by user to find posts they commented on
+        const commentsRef = collection(db, 'comments');
+        const userCommentsQuery = query(commentsRef, where('authorId', '==', targetUserId));
+        const userCommentsSnapshot = await getDocs(userCommentsQuery);
+        
+        const commentedPostIds = new Set<string>();
+        userCommentsSnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.postId && !addedPostIds.has(data.postId)) {
+            commentedPostIds.add(data.postId);
+          }
+        });
+
+        // Fetch post details for commented posts
+        for (const postId of commentedPostIds) {
+          const postDoc = await getDoc(doc(db, 'posts', postId));
+          if (postDoc.exists()) {
+            const data = postDoc.data();
+            participatedList.push({
+              postId: postDoc.id,
+              postTitle: data.title,
+              type: 'commenter',
+              createdAt: data.createdAt?.toDate(),
+            });
+          }
+        }
+
+        // Sort by date (newest first)
+        participatedList.sort((a, b) => {
+          if (!a.createdAt || !b.createdAt) return 0;
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        });
+
+        setParticipatedPosts(participatedList);
 
         setLoading(false);
       } catch (err) {
@@ -145,11 +184,10 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const getRoomTypeLabel = (type: string) => {
+  const getPostTypeLabel = (type: string) => {
     switch (type) {
-      case 'movie': return '영화';
-      case 'genre': return '장르';
-      case 'live': return '실시간';
+      case 'author': return '작성';
+      case 'commenter': return '댓글';
       default: return type;
     }
   };
@@ -242,26 +280,31 @@ const ProfilePage: React.FC = () => {
           )}
         </div>
 
-        {/* Chat Memberships Section */}
+        {/* Participated Posts Section */}
         <div className="profile-section">
           <h2 className="section-title">
-            <span className="section-icon">💬</span>
-            {isOwnProfile ? '참여 중인 채팅방' : `${profile.displayName}님이 참여 중인 채팅방`}
-            <span className="section-count">{chatMemberships.length}</span>
+            <span className="section-icon">📝</span>
+            {isOwnProfile ? '참여 중인 게시글' : `${profile.displayName}님이 참여 중인 게시글`}
+            <span className="section-count">{participatedPosts.length}</span>
           </h2>
-          {chatMemberships.length === 0 ? (
-            <p className="empty-section">참여 중인 채팅방이 없습니다.</p>
+          {participatedPosts.length === 0 ? (
+            <p className="empty-section">참여 중인 게시글이 없습니다.</p>
           ) : (
             <div className="chat-memberships-list">
-              {chatMemberships.map((membership) => (
-                <div key={membership.roomId} className="chat-membership-card">
+              {participatedPosts.map((post) => (
+                <div 
+                  key={post.postId} 
+                  className="chat-membership-card"
+                  onClick={() => navigate(`/post/${post.postId}`)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div className="chat-room-type-badge">
-                    {getRoomTypeLabel(membership.roomType)}
+                    {getPostTypeLabel(post.type)}
                   </div>
-                  <span className="chat-room-name">{membership.roomName}</span>
-                  {membership.joinedAt && (
+                  <span className="chat-room-name">{post.postTitle}</span>
+                  {post.createdAt && (
                     <span className="chat-joined-date">
-                      {membership.joinedAt.toLocaleDateString('ko-KR')} 참여
+                      {post.createdAt.toLocaleDateString('ko-KR')}
                     </span>
                   )}
                 </div>

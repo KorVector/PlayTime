@@ -36,10 +36,37 @@ interface Credit {
   profile_path: string | null;
 }
 
+interface WatchProvider {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string;
+}
+
+interface WatchProviders {
+  flatrate?: WatchProvider[];
+  rent?: WatchProvider[];
+  buy?: WatchProvider[];
+  link?: string;
+}
+
+// 주요 스트리밍 플랫폼 링크 매핑
+const PROVIDER_LINKS: { [key: string]: string } = {
+  'Netflix': 'https://www.netflix.com/search?q=',
+  'Disney Plus': 'https://www.disneyplus.com/search?q=',
+  'Amazon Prime Video': 'https://www.primevideo.com/search?phrase=',
+  'Watcha': 'https://watcha.com/search?query=',
+  'wavve': 'https://www.wavve.com/search?searchWord=',
+  'Tving': 'https://www.tving.com/search?keyword=',
+  'Coupang Play': 'https://www.coupangplay.com/search?q=',
+  'Apple TV Plus': 'https://tv.apple.com/search?term=',
+  'Apple TV': 'https://tv.apple.com/search?term=',
+};
+
 const MovieDetailModal: React.FC<MovieDetailModalProps> = ({ open, onClose, movieId }) => {
   const { isMobile } = useResponsive();
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [credits, setCredits] = useState<{ cast: Credit[]; director: Credit | null }>({ cast: [], director: null });
+  const [watchProviders, setWatchProviders] = useState<WatchProviders | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -51,14 +78,16 @@ const MovieDetailModal: React.FC<MovieDetailModalProps> = ({ open, onClose, movi
   const fetchMovieDetail = async (id: number) => {
     setLoading(true);
     try {
-      // 영화 상세 정보와 크레딧 동시에 가져오기
-      const [movieRes, creditsRes] = await Promise.all([
+      // 영화 상세 정보, 크레딧, 스트리밍 정보 동시에 가져오기
+      const [movieRes, creditsRes, providersRes] = await Promise.all([
         fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=ko-KR`),
-        fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=ko-KR`)
+        fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=ko-KR`),
+        fetch(`${BASE_URL}/movie/${id}/watch/providers?api_key=${API_KEY}`)
       ]);
 
       const movieData = await movieRes.json();
       const creditsData = await creditsRes.json();
+      const providersData = await providersRes.json();
 
       setMovie(movieData);
       
@@ -66,11 +95,24 @@ const MovieDetailModal: React.FC<MovieDetailModalProps> = ({ open, onClose, movi
       const cast = creditsData.cast?.slice(0, 5) || [];
       const director = creditsData.crew?.find((c: Credit & { job: string }) => c.job === 'Director') || null;
       setCredits({ cast, director });
+
+      // 한국(KR) 스트리밍 정보 추출
+      const krProviders = providersData.results?.KR || null;
+      setWatchProviders(krProviders);
     } catch (error) {
       console.error('영화 정보 로딩 실패:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getProviderLink = (providerName: string, movieTitle: string) => {
+    const baseUrl = PROVIDER_LINKS[providerName];
+    if (baseUrl) {
+      return baseUrl + encodeURIComponent(movieTitle);
+    }
+    // 기본적으로 TMDB 제공 링크 사용
+    return watchProviders?.link || '#';
   };
 
   if (!open) return null;
@@ -162,6 +204,85 @@ const MovieDetailModal: React.FC<MovieDetailModalProps> = ({ open, onClose, movi
                   <p className="movie-detail-director">
                     🎬 감독: {credits.director.name}
                   </p>
+                )}
+
+                {/* 스트리밍 플랫폼 */}
+                {watchProviders && (watchProviders.flatrate || watchProviders.rent || watchProviders.buy) && (
+                  <div className="movie-detail-providers">
+                    <h3>📺 시청 가능한 플랫폼</h3>
+                    
+                    {watchProviders.flatrate && watchProviders.flatrate.length > 0 && (
+                      <div className="provider-section">
+                        <span className="provider-label">구독</span>
+                        <div className="provider-list">
+                          {watchProviders.flatrate.map((provider) => (
+                            <a
+                              key={provider.provider_id}
+                              href={getProviderLink(provider.provider_name, movie.title)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="provider-item"
+                              title={provider.provider_name}
+                            >
+                              <img
+                                src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`}
+                                alt={provider.provider_name}
+                              />
+                              <span>{provider.provider_name}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {watchProviders.rent && watchProviders.rent.length > 0 && (
+                      <div className="provider-section">
+                        <span className="provider-label">대여</span>
+                        <div className="provider-list">
+                          {watchProviders.rent.map((provider) => (
+                            <a
+                              key={provider.provider_id}
+                              href={getProviderLink(provider.provider_name, movie.title)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="provider-item"
+                              title={provider.provider_name}
+                            >
+                              <img
+                                src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`}
+                                alt={provider.provider_name}
+                              />
+                              <span>{provider.provider_name}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {watchProviders.buy && watchProviders.buy.length > 0 && (
+                      <div className="provider-section">
+                        <span className="provider-label">구매</span>
+                        <div className="provider-list">
+                          {watchProviders.buy.map((provider) => (
+                            <a
+                              key={provider.provider_id}
+                              href={getProviderLink(provider.provider_name, movie.title)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="provider-item"
+                              title={provider.provider_name}
+                            >
+                              <img
+                                src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`}
+                                alt={provider.provider_name}
+                              />
+                              <span>{provider.provider_name}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
                 
                 <div className="movie-detail-overview">

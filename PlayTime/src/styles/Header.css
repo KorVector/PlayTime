@@ -148,6 +148,35 @@
   color: #8b5cf6;
 }
 
+/* 알림 버튼 */
+.notification-btn {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #f43f5e;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.4);
+  animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
 .login-btn {
   font-size: 15px;
   font-weight: 500;
@@ -273,6 +302,101 @@
   color: #f43f5e;
 }
 
+/* 영화 검색 스타일 */
+.movie-search-container {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+  margin: 0 24px;
+}
+
+.movie-search-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  padding: 10px 16px;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.movie-search-input:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.movie-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.movie-search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 8px;
+  background: rgba(15, 15, 25, 0.98);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+}
+
+.search-loading,
+.search-no-results {
+  padding: 16px;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  font-size: 14px;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.search-result-item:hover {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.search-result-poster {
+  width: 40px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.search-result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.search-result-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-year {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
 /* 태블릿 (641px - 1024px) */
 @media (max-width: 1024px) and (min-width: 641px) {
   .header {
@@ -319,6 +443,11 @@
   .profile-name {
     font-size: 13px;
     max-width: 92px;
+  }
+
+  .movie-search-container {
+    max-width: 280px;
+    margin: 0 16px;
   }
 }
 
@@ -390,6 +519,10 @@
     position: static;
     width: 100%;
     margin-top: 8px;
+  }
+
+  .movie-search-container {
+    display: none;
   }
 }
 

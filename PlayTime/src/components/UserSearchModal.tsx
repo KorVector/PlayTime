@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import '../styles/UserSearchModal.css';
 
 interface UserSearchResult {
@@ -35,26 +35,19 @@ const UserSearchModal: React.FC<UserSearchModalProps> = ({ open, onClose }) => {
 
     try {
       const usersRef = collection(db, 'users');
+      const searchTerm = searchQuery.trim().toLowerCase();
       
-      // Search by displayName (case-sensitive partial match using >= and <)
-      const searchTerm = searchQuery.trim();
-      const endTerm = searchTerm + '\uf8ff';
-      
-      const nameQuery = query(
-        usersRef,
-        where('displayName', '>=', searchTerm),
-        where('displayName', '<', endTerm),
-        limit(20)
-      );
-      
-      const nameSnapshot = await getDocs(nameQuery);
+      // Firestore는 대소문자 구분 검색만 지원하므로 전체 유저를 가져와서 클라이언트에서 필터링
+      const allUsersSnapshot = await getDocs(usersRef);
       const userResults: UserSearchResult[] = [];
-      const seenUids = new Set<string>();
       
-      nameSnapshot.forEach((doc) => {
-        if (!seenUids.has(doc.id)) {
-          seenUids.add(doc.id);
-          const data = doc.data();
+      allUsersSnapshot.forEach((doc) => {
+        const data = doc.data();
+        const displayName = (data.displayName || '').toLowerCase();
+        const email = (data.email || '').toLowerCase();
+        
+        // 이름 또는 이메일에 검색어가 포함되어 있으면 결과에 추가
+        if (displayName.includes(searchTerm) || email.includes(searchTerm)) {
           userResults.push({
             uid: doc.id,
             displayName: data.displayName || '알 수 없음',
@@ -65,30 +58,7 @@ const UserSearchModal: React.FC<UserSearchModalProps> = ({ open, onClose }) => {
         }
       });
 
-      // Also search by email
-      const emailQuery = query(
-        usersRef,
-        where('email', '>=', searchTerm),
-        where('email', '<', endTerm),
-        limit(20)
-      );
-
-      const emailSnapshot = await getDocs(emailQuery);
-      emailSnapshot.forEach((doc) => {
-        if (!seenUids.has(doc.id)) {
-          seenUids.add(doc.id);
-          const data = doc.data();
-          userResults.push({
-            uid: doc.id,
-            displayName: data.displayName || '알 수 없음',
-            email: data.email || '',
-            photoURL: data.photoURL,
-            bio: data.bio,
-          });
-        }
-      });
-
-      setResults(userResults);
+      setResults(userResults.slice(0, 20)); // 최대 20개 결과
     } catch (err) {
       console.error('유저 검색 에러:', err);
       setError('검색 중 오류가 발생했습니다. 다시 시도해주세요.');

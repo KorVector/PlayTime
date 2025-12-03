@@ -14,8 +14,14 @@ interface Message {
   userId: string;
   userName: string;
   userEmail: string;
+  userPhotoURL?: string;
   message: string;
   timestamp: Timestamp;
+  replyTo?: {
+    messageId: string;
+    userName: string;
+    message: string;
+  };
 }
 
 const LiveChatRoom: React.FC = () => {
@@ -25,7 +31,9 @@ const LiveChatRoom: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -77,14 +85,43 @@ const LiveChatRoom: React.FC = () => {
 
     try {
       const messagesRef = collection(db, 'chatMessages');
-      await addDoc(messagesRef, {
+      const messageData: Record<string, unknown> = {
         userId: user.uid,
         userName: user.displayName || user.email?.split('@')[0] || '익명',
         userEmail: user.email || '',
+        userPhotoURL: user.photoURL || null,
         message: newMessage.trim(),
         timestamp: Timestamp.now(),
-      });
+      };
+
+      // 답글인 경우 replyTo 정보 추가
+      if (replyingTo) {
+        messageData.replyTo = {
+          messageId: replyingTo.id,
+          userName: replyingTo.userName,
+          message: replyingTo.message.substring(0, 30) + (replyingTo.message.length > 30 ? '...' : ''),
+        };
+
+        // 답글 알림 생성 (본인이 아닌 경우)
+        if (replyingTo.userId !== user.uid) {
+          const notificationsRef = collection(db, 'notifications');
+          await addDoc(notificationsRef, {
+            userId: replyingTo.userId,
+            type: 'reply',
+            message: `${user.displayName || '누군가'}님이 채팅방에서 회원님의 메시지에 답글을 남겼습니다.`,
+            postId: 'live-chat',
+            postTitle: '실시간 채팅방',
+            fromUserId: user.uid,
+            fromUserName: user.displayName || user.email?.split('@')[0] || '익명',
+            read: false,
+            createdAt: Timestamp.now(),
+          });
+        }
+      }
+
+      await addDoc(messagesRef, messageData);
       setNewMessage('');
+      setReplyingTo(null);
     } catch (error: unknown) {
       console.error('메시지 전송 오류:', error);
       const firestoreError = error as FirestoreError;
@@ -104,6 +141,23 @@ const LiveChatRoom: React.FC = () => {
 
   const isMyMessage = (msg: Message) => {
     return user && msg.userId === user.uid;
+  };
+
+  const getInitial = (name: string) => {
+    return name ? name.charAt(0).toUpperCase() : '?';
+  };
+
+  const handleUserClick = (userId: string) => {
+    navigate(`/profile/${userId}`);
+  };
+
+  const handleReply = (msg: Message) => {
+    setReplyingTo(msg);
+    inputRef.current?.focus();
+  };
+
+  const cancelReply = () => {
+    setReplyingTo(null);
   };
 
   return (
@@ -130,11 +184,43 @@ const LiveChatRoom: React.FC = () => {
           ) : (
             messages.map((msg) => (
               <div key={msg.id} className={`message ${isMyMessage(msg) ? 'my-message' : ''}`}>
-                <div className="message-header">
-                  <span className="message-username">{msg.userName}</span>
-                  <span className="message-time">{formatTime(msg.timestamp)}</span>
+                <div 
+                  className="message-avatar"
+                  onClick={() => handleUserClick(msg.userId)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {msg.userPhotoURL ? (
+                    <img src={msg.userPhotoURL} alt={msg.userName} />
+                  ) : (
+                    <span className="avatar-initial">{getInitial(msg.userName)}</span>
+                  )}
                 </div>
-                <div className="message-text">{msg.message}</div>
+                <div className="message-content-wrapper">
+                  <div className="message-header">
+                    <span 
+                      className="message-username"
+                      onClick={() => handleUserClick(msg.userId)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {msg.userName}
+                    </span>
+                    <span className="message-time">{formatTime(msg.timestamp)}</span>
+                    <button 
+                      className="reply-msg-btn"
+                      onClick={() => handleReply(msg)}
+                      type="button"
+                    >
+                      답글
+                    </button>
+                  </div>
+                  {msg.replyTo && (
+                    <div className="reply-to-info">
+                      <span className="reply-to-label">↳ {msg.replyTo.userName}에게</span>
+                      <span className="reply-to-content">"{msg.replyTo.message}"</span>
+                    </div>
+                  )}
+                  <div className="message-text">{msg.message}</div>
+                </div>
               </div>
             ))
           )}
@@ -142,14 +228,23 @@ const LiveChatRoom: React.FC = () => {
         </div>
 
         <form className="message-input-form" onSubmit={handleSendMessage}>
-          <input
-            type="text"
-            className="message-input"
-            placeholder="메시지를 입력하세요..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
-          <button type="submit" className="send-button" disabled={!newMessage.trim()}>전송</button>
+          {replyingTo && (
+            <div className="replying-to-bar">
+              <span>↳ {replyingTo.userName}에게 답글 작성 중</span>
+              <button type="button" className="cancel-reply-btn" onClick={cancelReply}>✕</button>
+            </div>
+          )}
+          <div className="message-input-row">
+            <input
+              ref={inputRef}
+              type="text"
+              className="message-input"
+              placeholder={replyingTo ? `${replyingTo.userName}에게 답글...` : "메시지를 입력하세요..."}
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+            />
+            <button type="submit" className="send-button" disabled={!newMessage.trim()}>전송</button>
+          </div>
         </form>
       </div>
     </div>
