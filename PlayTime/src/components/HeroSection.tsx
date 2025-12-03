@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { collection, query, orderBy, limit, onSnapshot, addDoc, Timestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 import { useResponsive } from '../hooks/useResponsive';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/HeroSection.css';
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
-const IMAGE_BASE = 'https://image.tmdb.org/t/p/original';
+const IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 
 interface HeroSectionProps {
   onRecommendClick?: () => void;
@@ -14,14 +18,40 @@ interface Movie {
   id: number;
   title: string;
   backdrop_path: string | null;
+  poster_path: string | null;
   overview: string;
 }
 
+interface ChatMessage {
+  id: string;
+  userId: string;
+  userName: string;
+  userPhotoURL?: string;
+  message: string;
+  timestamp: Timestamp;
+}
+
+// 샘플 채팅 버블 데이터 (실제 채팅이 없을 때 보여줄 애니메이션용)
+const sampleBubbles = [
+  { id: 1, user: '영화팬', message: '어벤져스 엔드게임 진짜 명작이야 👍', delay: 0 },
+  { id: 2, user: '시네필', message: '인터스텔라 OST 들으면 소름..', delay: 2 },
+  { id: 3, user: '무비러버', message: '오늘 뭐 볼까? 추천 좀!', delay: 4 },
+  { id: 4, user: '팝콘매니아', message: '듄2 IMAX로 봐야 제맛 🎬', delay: 6 },
+  { id: 5, user: '밤샘족', message: '넷플릭스 신작 뭐 있어?', delay: 8 },
+  { id: 6, user: '평론가', message: '기생충 다시 봐도 대단해', delay: 10 },
+  { id: 7, user: '액션덕후', message: '존윅4 액션 미쳤다 ㄷㄷ', delay: 1 },
+  { id: 8, user: '로맨스팬', message: '라라랜드 엔딩 아직도 😢', delay: 3 },
+];
+
 const HeroSection: React.FC<HeroSectionProps> = ({ onRecommendClick }) => {
-  const { isMobile, isTablet } = useResponsive();
+  const { isMobile } = useResponsive();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   // 인기 영화 가져오기
   useEffect(() => {
@@ -31,11 +61,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onRecommendClick }) => {
           `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=ko-KR&page=1`
         );
         const data = await res.json();
-        // backdrop_path가 있는 영화만 필터링하고 10개 선택
-        const moviesWithBackdrop = data.results
-          .filter((m: Movie) => m.backdrop_path)
-          .slice(0, 10);
-        setMovies(moviesWithBackdrop);
+        const moviesWithPoster = data.results
+          .filter((m: Movie) => m.poster_path)
+          .slice(0, 8);
+        setMovies(moviesWithPoster);
       } catch (error) {
         console.error('영화 로딩 실패:', error);
       }
@@ -44,83 +73,205 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onRecommendClick }) => {
     fetchMovies();
   }, []);
 
-  // 자동 슬라이드 (8초마다)
+  // 실시간 채팅 메시지 구독
   useEffect(() => {
-    if (movies.length === 0) return;
+    const messagesRef = collection(db, 'chatMessages');
+    const q = query(messagesRef, orderBy('timestamp', 'desc'), limit(15));
 
-    const interval = setInterval(() => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % movies.length);
-        setIsTransitioning(false);
-      }, 500);
-    }, 8000);
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgs: ChatMessage[] = [];
+      snapshot.forEach((doc) => {
+        msgs.push({ id: doc.id, ...doc.data() } as ChatMessage);
+      });
+      setChatMessages(msgs.reverse());
+    });
 
-    return () => clearInterval(interval);
-  }, [movies.length]);
+    return () => unsubscribe();
+  }, []);
 
-  const currentMovie = movies[currentIndex];
+  // 채팅 스크롤
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !user || sending) return;
+
+    setSending(true);
+    try {
+      const messagesRef = collection(db, 'chatMessages');
+      await addDoc(messagesRef, {
+        userId: user.uid,
+        userName: user.displayName || user.email?.split('@')[0] || '익명',
+        userPhotoURL: user.photoURL || null,
+        message: newMessage.trim(),
+        timestamp: Timestamp.now(),
+      });
+      setNewMessage('');
+    } catch (error) {
+      console.error('메시지 전송 실패:', error);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const getInitial = (name: string) => {
+    return name ? name.charAt(0).toUpperCase() : '?';
+  };
+
+  const handleOpenFullChat = () => {
+    navigate('/live-chat');
+  };
 
   return (
-    <section className="hero-section">
-      {/* 배경 이미지들 */}
-      {movies.length > 0 && currentMovie && (
-        <div className={`hero-backdrop ${isTransitioning ? 'fade-out' : 'fade-in'}`}>
-          <img 
-            src={`${IMAGE_BASE}${currentMovie.backdrop_path}`}
-            alt={currentMovie.title}
-            className="hero-image"
-          />
+    <>
+      {/* 섹션 1: 커뮤니티 강조 히어로 */}
+      <section className="community-hero">
+        {/* 떠오르는 채팅 버블 애니메이션 */}
+        <div className="floating-bubbles">
+          {sampleBubbles.map((bubble) => (
+            <div
+              key={bubble.id}
+              className="floating-bubble"
+              style={{ animationDelay: `${bubble.delay}s` }}
+            >
+              <span className="bubble-user">{bubble.user}</span>
+              <span className="bubble-message">{bubble.message}</span>
+            </div>
+          ))}
         </div>
-      )}
 
-      <div className="hero-overlay"></div>
+        <div className="community-hero-content">
+          <div className="community-badge">🎬 영화 커뮤니티</div>
+          <h1 className="community-title">
+            영화, 혼자 보지 말고<br />
+            <span className="highlight">함께 이야기해요</span>
+          </h1>
+          <p className="community-subtitle">
+            PlayTime은 영화를 보는 곳이 아닌,<br />
+            영화에 대해 웃고 떠들 수 있는 <strong>커뮤니티</strong>입니다.
+          </p>
+          
+          <div className="community-stats">
+            <div className="stat-item">
+              <span className="stat-icon">💬</span>
+              <span className="stat-label">실시간 채팅</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">📝</span>
+              <span className="stat-label">영화별 게시판</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">🤝</span>
+              <span className="stat-label">취향 공유</span>
+            </div>
+          </div>
 
-      <div className={`hero-content ${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'}`}>
-        {/* 현재 영화 정보 */}
-        {currentMovie && (
-          <div className={`hero-movie-info ${isTransitioning ? 'fade-out' : 'fade-in'}`}>
-            <h1 className="hero-movie-title">{currentMovie.title}</h1>
-            {!isMobile && currentMovie.overview && (
-              <p className="hero-movie-overview">
-                {currentMovie.overview.length > 150 
-                  ? currentMovie.overview.substring(0, 150) + '...' 
-                  : currentMovie.overview}
-              </p>
+          <div className="community-buttons">
+            <button className="community-btn-primary" onClick={handleOpenFullChat}>
+              💬 채팅 시작하기
+            </button>
+            <button className="community-btn-secondary" onClick={onRecommendClick}>
+              🎯 영화 추천받기
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 섹션 2: 실시간 채팅 + 인기 영화 */}
+      <section className="live-section">
+        <div className="live-section-inner">
+          {/* 왼쪽: 실시간 채팅 */}
+          <div className="live-chat-panel">
+            <div className="live-chat-header">
+              <div className="live-chat-title-wrap">
+                <span className="live-indicator"></span>
+                <h2>실시간 대화</h2>
+              </div>
+              <button className="expand-chat-btn" onClick={handleOpenFullChat}>
+                전체보기 →
+              </button>
+            </div>
+            
+            <div className="live-chat-messages">
+              {chatMessages.length === 0 ? (
+                <div className="live-chat-empty">
+                  <span className="empty-icon">💭</span>
+                  <p>아직 대화가 없어요</p>
+                  <p className="empty-sub">첫 번째로 인사해보세요!</p>
+                </div>
+              ) : (
+                chatMessages.map((msg) => (
+                  <div key={msg.id} className="live-chat-message">
+                    <div className="live-chat-avatar">
+                      {msg.userPhotoURL ? (
+                        <img src={msg.userPhotoURL} alt={msg.userName} />
+                      ) : (
+                        <span>{getInitial(msg.userName)}</span>
+                      )}
+                    </div>
+                    <div className="live-chat-content">
+                      <span className="live-chat-username">{msg.userName}</span>
+                      <span className="live-chat-text">{msg.message}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            {user ? (
+              <form className="live-chat-input-form" onSubmit={handleSendMessage}>
+                <input
+                  type="text"
+                  placeholder="메시지를 입력하세요..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  className="live-chat-input"
+                />
+                <button type="submit" className="live-chat-send" disabled={sending || !newMessage.trim()}>
+                  전송
+                </button>
+              </form>
+            ) : (
+              <div className="live-chat-login-prompt" onClick={() => (window as Window & { openAuth?: () => void }).openAuth?.()}>
+                🔐 로그인하고 대화에 참여하세요!
+              </div>
             )}
           </div>
-        )}
 
-        <p className="hero-subtitle">
-          영화 고르는 게 힘들고 피로할 때, PlayTime으로 해결하세요.
-          {!isMobile && <br />}
-          {!isMobile && '사용자 채팅방을 통해 사람들과 영화를 추천받고 추천받는 혁신적인 서비스를 제공합니다.'}
-        </p>
-        <button className="hero-btn" onClick={onRecommendClick}>
-          {isMobile ? '추천 받으러 가기' : '영화 추천 받으러 가기'}
-        </button>
-
-        {/* 슬라이드 인디케이터 */}
-        {movies.length > 0 && (
-          <div className="hero-indicators">
-            {movies.map((_, index) => (
-              <button
-                key={index}
-                className={`indicator ${index === currentIndex ? 'active' : ''}`}
-                onClick={() => {
-                  setIsTransitioning(true);
-                  setTimeout(() => {
-                    setCurrentIndex(index);
-                    setIsTransitioning(false);
-                  }, 300);
-                }}
-                aria-label={`슬라이드 ${index + 1}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
+          {/* 오른쪽: 인기 영화 미니 캐러셀 */}
+          {!isMobile && (
+            <div className="trending-movies-panel">
+              <h2 className="trending-title">🔥 지금 뜨는 영화</h2>
+              <p className="trending-subtitle">이 영화들에 대해 이야기해보세요</p>
+              
+              <div className="trending-movies-grid">
+                {movies.slice(0, isMobile ? 4 : 6).map((movie) => (
+                  <div 
+                    key={movie.id} 
+                    className="trending-movie-card"
+                    onClick={() => {
+                      const openMovieDetail = (window as Window & { openMovieDetail?: (id: number) => void }).openMovieDetail;
+                      if (openMovieDetail) openMovieDetail(movie.id);
+                    }}
+                  >
+                    <img 
+                      src={`${IMAGE_BASE}${movie.poster_path}`} 
+                      alt={movie.title}
+                    />
+                    <div className="trending-movie-overlay">
+                      <span className="trending-movie-title">{movie.title}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    </>
   );
 };
 
