@@ -39,11 +39,21 @@ const MovieChatListPage: React.FC = () => {
       setError(null);
 
       try {
-        const url = `${BASE_URL}/movie/popular?language=ko-KR&page=1&api_key=${API_KEY}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        setMovies(data.results || []);
+        // 3페이지 가져와서 60개 영화 표시
+        const pages = [1, 2, 3];
+        const responses = await Promise.all(
+          pages.map(page => 
+            fetch(`${BASE_URL}/movie/popular?language=ko-KR&page=${page}&api_key=${API_KEY}`)
+          )
+        );
+        
+        const allMovies: TmdbMovie[] = [];
+        for (const res of responses) {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          allMovies.push(...(data.results || []));
+        }
+        setMovies(allMovies);
       } catch (err) {
         console.error(err);
         setError('영화 데이터를 불러오는 중 오류가 발생했습니다.');
@@ -67,7 +77,7 @@ const MovieChatListPage: React.FC = () => {
           ← 뒤로가기
         </button>
 
-        <h1 className="page-title">영화별 채팅방</h1>
+        <h1 className="page-title">영화별 게시판</h1>
         <p className="page-description">
           영화를 선택하고 다른 팬들과 이야기를 나눠보세요
         </p>
