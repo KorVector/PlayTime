@@ -239,6 +239,78 @@
   margin: 8px 0;
 }
 
+/* 스트리밍 플랫폼 */
+.movie-detail-providers {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+}
+
+.movie-detail-providers h3 {
+  font-size: 1rem;
+  color: #fff;
+  margin: 0 0 12px 0;
+}
+
+.provider-section {
+  margin-bottom: 12px;
+}
+
+.provider-section:last-child {
+  margin-bottom: 0;
+}
+
+.provider-label {
+  display: inline-block;
+  background: rgba(139, 92, 246, 0.3);
+  color: #a78bfa;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.provider-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.provider-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 12px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.provider-item:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.provider-item img {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.provider-item span {
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 /* 줄거리 */
 .movie-detail-overview {
   margin-top: 20px;

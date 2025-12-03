@@ -6,9 +6,25 @@
   position: relative;
   width: 100%;
   height: 800px;
-  background: linear-gradient(180deg, #0a0a14 0%, #0f0f1a 100%);
-  overflow: visible;
-  margin-top: 80px;
+  background: #0a0a14;
+  overflow: hidden;
+  margin-top: 0;
+  padding-top: 80px;
+}
+
+.hero-backdrop {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.hero-backdrop.fade-in {
+  opacity: 1;
+}
+
+.hero-backdrop.fade-out {
+  opacity: 0;
 }
 
 .hero-image {
@@ -16,7 +32,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .hero-overlay {
@@ -25,7 +41,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, rgba(10, 10, 20, 0.3) 0%, rgba(10, 10, 20, 0.7) 50%, #0a0a14 100%);
+  background: linear-gradient(180deg, rgba(10, 10, 20, 0.2) 0%, rgba(10, 10, 20, 0.6) 50%, #0a0a14 100%);
   z-index: 1;
 }
 
@@ -39,40 +55,73 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  align-items: center;
-  padding-bottom: 100px;
+  align-items: flex-start;
   z-index: 2;
-  padding: 20px;
-  padding-bottom: 60px;
+  padding: 60px 80px;
   box-sizing: border-box;
 }
 
-.hero-subtitle {
-  width: 800px;
-  text-align: center;
+/* 현재 영화 정보 */
+.hero-movie-info {
+  text-align: left;
+  margin-bottom: 20px;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.hero-movie-info.fade-in {
+  opacity: 1;
+}
+
+.hero-movie-info.fade-out {
+  opacity: 0;
+}
+
+.hero-movie-title {
+  font-size: 56px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 12px 0;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
+  letter-spacing: -1px;
+}
+
+.hero-movie-overview {
+  max-width: 600px;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.75);
-  font-size: 20px;
+  line-height: 1.7;
+  margin: 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero-subtitle {
+  max-width: 550px;
+  text-align: left;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 15px;
   font-family: 'DM Sans', sans-serif;
   font-weight: 400;
-  line-height: 32px;
-  margin: 0 auto 35px;
+  line-height: 24px;
+  margin: 0 0 25px 0;
 }
 
 .hero-btn {
-  width: 280px;
-  height: 56px;
+  width: auto;
+  min-width: 200px;
+  height: 52px;
   background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
   border: none;
-  border-radius: 28px;
+  border-radius: 8px;
   color: white;
-  font-size: 16px;
+  font-size: 15px;
   font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   white-space: nowrap;
   box-shadow: 0 8px 32px rgba(139, 92, 246, 0.35);
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  padding: 0 28px;
 }
 
 .hero-btn:hover {
@@ -80,88 +129,145 @@
   box-shadow: 0 12px 40px rgba(139, 92, 246, 0.5);
 }
 
+/* 슬라이드 인디케이터 */
+.hero-indicators {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.indicator:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.indicator.active {
+  width: 30px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+}
+
 /* 태블릿 (641px - 1024px) */
 @media (max-width: 1024px) and (min-width: 641px) {
   .hero-section {
     height: 550px;
-    margin-top: 70px;
+    margin-top: 0;
+    padding-top: 70px;
   }
 
   .hero-content {
-    padding-bottom: 70px;
+    padding: 40px 50px;
+  }
+
+  .hero-movie-title {
+    font-size: 42px;
+  }
+
+  .hero-movie-overview {
+    font-size: 14px;
+    max-width: 450px;
   }
 
   .hero-subtitle {
-    width: 85%;
-    font-size: 17px;
-    line-height: 28px;
-    margin-bottom: 30px;
+    max-width: 450px;
+    font-size: 14px;
+    line-height: 22px;
+    margin-bottom: 20px;
   }
 
   .hero-btn {
-    width: 240px;
-    height: 50px;
-    font-size: 15px;
+    height: 48px;
+    font-size: 14px;
+    margin-bottom: 25px;
   }
 }
 
 /* 모바일 (max-width: 640px) */
 @media (max-width: 640px) {
   .hero-section {
-    height: 420px;
-    margin-top: 64px;
+    height: 500px;
+    margin-top: 0;
+    padding-top: 64px;
   }
 
   .hero-content {
-    padding-bottom: 50px;
-    padding: 20px;
+    padding: 30px 20px;
+    align-items: flex-start;
   }
 
   .hero-content.mobile {
-    justify-content: center;
+    justify-content: flex-end;
+  }
+
+  .hero-movie-info {
+    margin-bottom: 15px;
+  }
+
+  .hero-movie-title {
+    font-size: 32px;
+    margin-bottom: 8px;
   }
 
   .hero-subtitle {
-    width: 95%;
-    font-size: 14px;
-    line-height: 24px;
-    margin-bottom: 25px;
     max-width: 100%;
-  }
-
-  .hero-subtitle span {
-    display: block;
-    margin-top: 8px;
+    font-size: 12px;
+    line-height: 18px;
+    margin-bottom: 18px;
   }
 
   .hero-btn {
-    width: 200px;
-    height: 46px;
-    font-size: 14px;
-    border-radius: 23px;
+    height: 44px;
+    font-size: 13px;
+    border-radius: 6px;
+    margin-bottom: 18px;
+    padding: 0 22px;
+  }
+
+  .indicator {
+    width: 8px;
+    height: 8px;
+  }
+
+  .indicator.active {
+    width: 24px;
   }
 }
 
 /* 초소형 모바일 (max-width: 360px) */
 @media (max-width: 360px) {
   .hero-section {
-    height: 380px;
-    margin-top: 60px;
+    height: 450px;
+    margin-top: 0;
+    padding-top: 60px;
   }
 
   .hero-content {
-    padding-bottom: 40px;
+    padding: 25px 16px;
+  }
+
+  .hero-movie-title {
+    font-size: 26px;
   }
 
   .hero-subtitle {
-    font-size: 13px;
-    line-height: 22px;
-    margin-bottom: 20px;
+    font-size: 11px;
+    line-height: 16px;
+    margin-bottom: 12px;
   }
 
   .hero-btn {
-    width: 180px;
-    height: 42px;
-    font-size: 13px;
+    height: 40px;
+    font-size: 12px;
+    padding: 0 18px;
   }
 }

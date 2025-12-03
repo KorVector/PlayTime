@@ -1,12 +1,25 @@
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 import { useResponsive } from '../hooks/useResponsive';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/Header.css';
 
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const BASE_URL = 'https://api.themoviedb.org/3';
+const IMAGE_BASE = 'https://image.tmdb.org/t/p/w92';
+
 interface HeaderProps {
   onLoginClick?: () => void;
   onShowLiked?: () => void;
+}
+
+interface SearchMovie {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  release_date?: string;
 }
 
 // Constants for scroll behavior
@@ -20,14 +33,18 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchMovie[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const location = useLocation();
-
-  // spacer 높이(헤더가 fixed이므로 문서 흐름 밀림 방지용)
-  const [spacerHeight, setSpacerHeight] = useState<number>(0);
 
   // Detect if current page is a chat-related page
   const isChatPage =
@@ -57,6 +74,9 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -65,20 +85,63 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
     };
   }, []);
 
-  // 헤더의 실제 높이를 측정해서 spacer에 반영
-  useLayoutEffect(() => {
-    const measure = () => {
-      const h = headerRef.current ? headerRef.current.offsetHeight : 0;
-      setSpacerHeight(h);
+  // 영화 검색 API 호출 (debounce)
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const res = await fetch(
+          `${BASE_URL}/search/movie?api_key=${API_KEY}&language=ko-KR&query=${encodeURIComponent(searchQuery)}&page=1`
+        );
+        const data = await res.json();
+        setSearchResults(data.results?.slice(0, 8) || []);
+        setShowSearchResults(true);
+      } catch (err) {
+        console.error('영화 검색 오류:', err);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
     };
+  }, [searchQuery]);
 
-    // 최초 측정
-    measure();
+  // 읽지 않은 알림 개수 실시간 구독
+  useEffect(() => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
 
-    // 리사이즈 시 재측정
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, []);
+    const notificationsRef = collection(db, 'notifications');
+    const q = query(
+      notificationsRef,
+      where('userId', '==', user.uid),
+      where('read', '==', false)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setUnreadCount(snapshot.size);
+    }, (error) => {
+      console.error('알림 구독 오류:', error);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
 
   // Scroll-based header hide/show behavior with RAF throttling
   useEffect(() => {
@@ -200,6 +263,26 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
     }
   };
 
+  const handleMovieClick = (movieId: number) => {
+    setSearchQuery('');
+    setShowSearchResults(false);
+    const openMovieDetail = (window as Window & { openMovieDetail?: (movieId: number) => void }).openMovieDetail;
+    if (typeof openMovieDetail === 'function') {
+      openMovieDetail(movieId);
+    }
+  };
+
+  const handleNotifications = () => {
+    if (!user) {
+      onLoginClick?.();
+      return;
+    }
+    const openNotifications = (window as Window & { openNotifications?: () => void }).openNotifications;
+    if (typeof openNotifications === 'function') {
+      openNotifications();
+    }
+  };
+
   return (
     <>
       <header
@@ -208,8 +291,49 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
         aria-hidden={!isVisible}
       >
         <div className="header-container">
-          <div className="logo">
+          <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
             <span className="logo-gradient">PlayTime</span>
+          </div>
+
+          {/* 영화 검색창 */}
+          <div className="movie-search-container" ref={searchRef}>
+            <input
+              type="text"
+              className="movie-search-input"
+              placeholder="영화 검색..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => searchQuery.trim() && setShowSearchResults(true)}
+            />
+            {showSearchResults && (
+              <div className="movie-search-results">
+                {searchLoading ? (
+                  <div className="search-loading">검색 중...</div>
+                ) : searchResults.length === 0 ? (
+                  <div className="search-no-results">검색 결과가 없습니다</div>
+                ) : (
+                  searchResults.map((movie) => (
+                    <div
+                      key={movie.id}
+                      className="search-result-item"
+                      onClick={() => handleMovieClick(movie.id)}
+                    >
+                      <img
+                        src={movie.poster_path ? `${IMAGE_BASE}${movie.poster_path}` : 'https://placehold.co/46x69'}
+                        alt={movie.title}
+                        className="search-result-poster"
+                      />
+                      <div className="search-result-info">
+                        <span className="search-result-title">{movie.title}</span>
+                        <span className="search-result-year">
+                          {movie.release_date?.split('-')[0] || '연도 미상'}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
 
           {isMobile && (
@@ -223,7 +347,10 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
           )}
 
           <nav className={`nav-menu ${isMenuOpen ? 'open' : ''}`}>
-            <button className="nav-item">알림</button>
+            <button className="nav-item notification-btn" onClick={handleNotifications}>
+              알림
+              {unreadCount > 0 && <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>}
+            </button>
             <button className="nav-item" onClick={handleOpenLiked}>
               MY 찜 보기
             </button>
@@ -274,9 +401,6 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
           </nav>
         </div>
       </header>
-
-      {/* 헤더가 position:fixed이므로 문서 흐름 유지를 위해 spacer를 둠 */}
-      <div style={{ height: spacerHeight }} aria-hidden="true" />
     </>
   );
 };

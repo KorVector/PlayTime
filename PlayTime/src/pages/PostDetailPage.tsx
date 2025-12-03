@@ -15,8 +15,14 @@ interface Comment {
   postId: string;
   authorId: string;
   authorName: string;
+  authorPhotoURL?: string;
   content: string;
   createdAt: Timestamp;
+  replyTo?: {
+    commentId: string;
+    authorName: string;
+    content: string;
+  };
 }
 
 interface Post {
@@ -41,7 +47,9 @@ const PostDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [commentsError, setCommentsError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
   const commentsEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -140,13 +148,57 @@ const PostDetailPage: React.FC = () => {
     setSubmitting(true);
     try {
       const commentsRef = collection(db, 'comments');
-      await addDoc(commentsRef, {
+      const commentData: Record<string, unknown> = {
         postId: postId,
         authorId: user.uid,
         authorName: user.displayName || user.email?.split('@')[0] || '익명',
+        authorPhotoURL: user.photoURL || null,
         content: newComment.trim(),
         createdAt: Timestamp.now(),
-      });
+      };
+
+      // 답글인 경우 replyTo 정보 추가
+      if (replyingTo) {
+        commentData.replyTo = {
+          commentId: replyingTo.id,
+          authorName: replyingTo.authorName,
+          content: replyingTo.content.substring(0, 50) + (replyingTo.content.length > 50 ? '...' : ''),
+        };
+      }
+
+      await addDoc(commentsRef, commentData);
+
+      // 알림 생성: 게시글 작성자에게 알림 (본인이 아닌 경우)
+      if (post && post.authorId !== user.uid) {
+        const notificationsRef = collection(db, 'notifications');
+        await addDoc(notificationsRef, {
+          userId: post.authorId,
+          type: 'comment',
+          message: `${user.displayName || '누군가'}님이 회원님의 게시글에 댓글을 남겼습니다.`,
+          postId: postId,
+          postTitle: post.title,
+          fromUserId: user.uid,
+          fromUserName: user.displayName || user.email?.split('@')[0] || '익명',
+          read: false,
+          createdAt: Timestamp.now(),
+        });
+      }
+
+      // 답글인 경우 원 댓글 작성자에게도 알림 (본인이 아닌 경우)
+      if (replyingTo && replyingTo.authorId !== user.uid) {
+        const notificationsRef = collection(db, 'notifications');
+        await addDoc(notificationsRef, {
+          userId: replyingTo.authorId,
+          type: 'reply',
+          message: `${user.displayName || '누군가'}님이 회원님의 댓글에 답글을 남겼습니다.`,
+          postId: postId,
+          postTitle: post?.title || '',
+          fromUserId: user.uid,
+          fromUserName: user.displayName || user.email?.split('@')[0] || '익명',
+          read: false,
+          createdAt: Timestamp.now(),
+        });
+      }
 
       // 게시글 댓글 수 증가
       const postRef = doc(db, 'posts', postId);
@@ -155,6 +207,7 @@ const PostDetailPage: React.FC = () => {
       });
 
       setNewComment('');
+      setReplyingTo(null);
     } catch (error: unknown) {
       console.error('댓글 작성 오류:', error);
       const firestoreError = error as FirestoreError;
@@ -180,6 +233,23 @@ const PostDetailPage: React.FC = () => {
 
   const isMyComment = (comment: Comment) => {
     return user && comment.authorId === user.uid;
+  };
+
+  const getInitial = (name: string) => {
+    return name ? name.charAt(0).toUpperCase() : '?';
+  };
+
+  const handleAuthorClick = (authorId: string) => {
+    navigate(`/profile/${authorId}`);
+  };
+
+  const handleReply = (comment: Comment) => {
+    setReplyingTo(comment);
+    inputRef.current?.focus();
+  };
+
+  const cancelReply = () => {
+    setReplyingTo(null);
   };
 
   if (loading) {
@@ -241,11 +311,43 @@ const PostDetailPage: React.FC = () => {
             ) : (
               comments.map((comment) => (
                 <div key={comment.id} className={`comment ${isMyComment(comment) ? 'my-comment' : ''}`}>
-                  <div className="comment-header">
-                    <span className="comment-author">{comment.authorName}</span>
-                    <span className="comment-time">{formatTimeAgo(comment.createdAt)}</span>
+                  <div 
+                    className="comment-avatar"
+                    onClick={() => handleAuthorClick(comment.authorId)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {comment.authorPhotoURL ? (
+                      <img src={comment.authorPhotoURL} alt={comment.authorName} />
+                    ) : (
+                      <span className="avatar-initial">{getInitial(comment.authorName)}</span>
+                    )}
                   </div>
-                  <p className="comment-text">{comment.content}</p>
+                  <div className="comment-content-wrapper">
+                    <div className="comment-header">
+                      <span 
+                        className="comment-author"
+                        onClick={() => handleAuthorClick(comment.authorId)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {comment.authorName}
+                      </span>
+                      <span className="comment-time">{formatTimeAgo(comment.createdAt)}</span>
+                      <button 
+                        className="reply-btn"
+                        onClick={() => handleReply(comment)}
+                        type="button"
+                      >
+                        답글
+                      </button>
+                    </div>
+                    {comment.replyTo && (
+                      <div className="reply-to-info">
+                        <span className="reply-to-label">↳ {comment.replyTo.authorName}에게 답글</span>
+                        <span className="reply-to-content">"{comment.replyTo.content}"</span>
+                      </div>
+                    )}
+                    <p className="comment-text">{comment.content}</p>
+                  </div>
                 </div>
               ))
             )}
@@ -253,16 +355,25 @@ const PostDetailPage: React.FC = () => {
           </div>
 
           <form className="comment-form" onSubmit={handleSubmitComment}>
-            <input
-              type="text"
-              className="comment-input"
-              placeholder="댓글을 입력하세요..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-            />
-            <button type="submit" className="comment-submit-button" disabled={submitting || !newComment.trim()}>
-              {submitting ? '등록 중...' : '등록'}
-            </button>
+            {replyingTo && (
+              <div className="replying-to-bar">
+                <span>↳ {replyingTo.authorName}에게 답글 작성 중</span>
+                <button type="button" className="cancel-reply-btn" onClick={cancelReply}>✕</button>
+              </div>
+            )}
+            <div className="comment-input-row">
+              <input
+                ref={inputRef}
+                type="text"
+                className="comment-input"
+                placeholder={replyingTo ? `${replyingTo.authorName}에게 답글...` : "댓글을 입력하세요..."}
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+              />
+              <button type="submit" className="comment-submit-button" disabled={submitting || !newComment.trim()}>
+                {submitting ? '등록 중...' : '등록'}
+              </button>
+            </div>
           </form>
         </div>
       </div>

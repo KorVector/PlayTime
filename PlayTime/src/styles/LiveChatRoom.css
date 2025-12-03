@@ -85,6 +85,8 @@
 }
 
 .message {
+  display: flex;
+  gap: 12px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 16px;
   padding: 14px 18px;
@@ -98,6 +100,40 @@
   align-self: flex-end;
 }
 
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.message-avatar:hover {
+  transform: scale(1.1);
+}
+
+.message-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.message-avatar .avatar-initial {
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.message-content-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
 .message-header {
   display: flex;
   align-items: center;
@@ -109,6 +145,11 @@
   color: #8b5cf6;
   font-size: 13px;
   font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.message-username:hover {
+  color: #a78bfa;
 }
 
 .message-time {
@@ -123,12 +164,83 @@
   word-wrap: break-word;
 }
 
+.reply-msg-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin-left: auto;
+}
+
+.reply-msg-btn:hover {
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.reply-to-info {
+  background: rgba(139, 92, 246, 0.1);
+  border-left: 2px solid #8b5cf6;
+  padding: 4px 8px;
+  margin-bottom: 6px;
+  border-radius: 0 6px 6px 0;
+  font-size: 11px;
+}
+
+.reply-to-label {
+  color: #8b5cf6;
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.reply-to-content {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
 .message-input-form {
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  gap: 8px;
   padding: 20px 30px;
   background: rgba(255, 255, 255, 0.02);
   border-top: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.replying-to-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #a78bfa;
+}
+
+.cancel-reply-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.cancel-reply-btn:hover {
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.1);
+}
+
+.message-input-row {
+  display: flex;
+  gap: 12px;
 }
 
 .message-input {
