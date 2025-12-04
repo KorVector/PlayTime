@@ -1,0 +1,200 @@
+.popular-movies-page {
+  min-height: 100vh;
+  background: #0a0a14;
+  padding: 60px 20px;
+}
+
+.page-container {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.back-button {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #8b5cf6;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 30px;
+}
+
+.back-button:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.page-title {
+  font-size: 42px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.page-description {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 17px;
+  text-align: center;
+  margin-bottom: 60px;
+  line-height: 1.7;
+}
+
+.loading-text,
+.error-text,
+.no-data-text {
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  font-size: 16px;
+  padding: 40px;
+}
+
+.error-text {
+  color: #f43f5e;
+}
+
+.no-data-text {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 40px;
+  margin-top: 40px;
+  justify-items: center;
+}
+
+.movie-item-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 220px;
+}
+
+.rank-badge {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);
+  border: 3px solid #0a0a14;
+}
+
+/* Top 3 special colors */
+.movie-item-wrapper:nth-child(1) .rank-badge {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.7);
+}
+
+.movie-item-wrapper:nth-child(2) .rank-badge {
+  background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+  box-shadow: 0 4px 16px rgba(192, 192, 192, 0.7);
+}
+
+.movie-item-wrapper:nth-child(3) .rank-badge {
+  background: linear-gradient(135deg, #cd7f32 0%, #daa06d 100%);
+  box-shadow: 0 4px 16px rgba(205, 127, 50, 0.7);
+}
+
+.like-count {
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(139, 92, 246, 0.95);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  z-index: 10;
+}
+
+/* 태블릿 */
+@media (max-width: 1024px) {
+  .page-title {
+    font-size: 36px;
+  }
+
+  .page-description {
+    font-size: 16px;
+    margin-bottom: 40px;
+  }
+
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 35px;
+  }
+
+  .movie-item-wrapper {
+    max-width: 200px;
+  }
+
+  .rank-badge {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+  }
+
+  .like-count {
+    font-size: 13px;
+    padding: 5px 14px;
+  }
+}
+
+/* 모바일 */
+@media (max-width: 640px) {
+  .popular-movies-page {
+    padding: 40px 15px;
+  }
+
+  .page-title {
+    font-size: 28px;
+  }
+
+  .page-description {
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 30px;
+  }
+
+  .movie-item-wrapper {
+    max-width: 160px;
+  }
+
+  .rank-badge {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    top: -12px;
+    left: -12px;
+  }
+
+  .like-count {
+    font-size: 12px;
+    padding: 4px 12px;
+    bottom: -12px;
+  }
+}
