@@ -319,3 +319,22 @@
     font-size: 13px;
   }
 }
+
+/* 로딩 및 빈 상태 스타일 */
+.loading-topics,
+.no-topics {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .loading-topics,
+  .no-topics {
+    padding: 40px 20px;
+    font-size: 14px;
+  }
+}
