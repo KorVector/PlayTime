@@ -89,7 +89,7 @@ const MovieCarousel: React.FC<MovieCarouselProps> = ({ movies = [], title, child
         )}
       </div>
       <div className="carousel-controls">
-        <p className="more-info" onClick={() => navigate('/movie-list')}>영화 정보 더보기 →</p>
+        <button className="more-info" onClick={() => navigate('/movie-list')}>영화 정보 더보기 →</button>
       </div>
     </section>
   );

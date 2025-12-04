@@ -8,6 +8,7 @@ import '../styles/MovieListPage.css';
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w300';
+const TMDB_MAX_PAGES = 500; // TMDB API limits to 500 pages
 
 interface TmdbMovie {
   id: number;
@@ -49,7 +50,7 @@ const MovieListPage: React.FC = () => {
         
         const data = await response.json();
         setMovies(data.results || []);
-        setTotalPages(Math.min(data.total_pages || 1, 500)); // TMDB API limits to 500 pages
+        setTotalPages(Math.min(data.total_pages || 1, TMDB_MAX_PAGES));
       } catch (err) {
         console.error(err);
         setError('영화 데이터를 불러오는 중 오류가 발생했습니다.');
