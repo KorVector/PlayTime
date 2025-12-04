@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, query, orderBy, limit, onSnapshot, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -51,6 +51,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onRecommendClick }) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const chatMessagesRef = useRef<HTMLDivElement>(null);
 
   // 인기 영화 가져오기
   useEffect(() => {
@@ -87,6 +88,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onRecommendClick }) => {
 
     return () => unsubscribe();
   }, []);
+
+  // Auto-scroll to bottom when chat messages change
+  useEffect(() => {
+    if (chatMessagesRef.current) {
+      chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,7 +196,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onRecommendClick }) => {
               </button>
             </div>
             
-            <div className="live-chat-messages">
+            <div className="live-chat-messages" ref={chatMessagesRef}>
               {chatMessages.length === 0 ? (
                 <div className="live-chat-empty">
                   <span className="empty-icon">💭</span>

@@ -49,6 +49,7 @@ const PostDetailPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const commentsListRef = useRef<HTMLDivElement>(null);
 
   // Firestore에서 게시글 가져오기
   useEffect(() => {
@@ -122,6 +123,13 @@ const PostDetailPage: React.FC = () => {
 
     return () => unsubscribe();
   }, [postId]);
+
+  // Auto-scroll to bottom when comments change
+  useEffect(() => {
+    if (commentsListRef.current) {
+      commentsListRef.current.scrollTop = commentsListRef.current.scrollHeight;
+    }
+  }, [comments]);
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -294,7 +302,7 @@ const PostDetailPage: React.FC = () => {
         <div className="comments-section">
           <h2 className="comments-title">댓글 {comments.length}</h2>
           
-          <div className="comments-list">
+          <div className="comments-list" ref={commentsListRef}>
             {commentsError ? (
               <div className="error-comments">{commentsError}</div>
             ) : comments.length === 0 ? (
