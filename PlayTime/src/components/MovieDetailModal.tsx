@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useResponsive } from '../hooks/useResponsive';
 import '../styles/MovieDetailModal.css';
 
@@ -63,6 +64,7 @@ const PROVIDER_LINKS: { [key: string]: string } = {
 };
 
 const MovieDetailModal: React.FC<MovieDetailModalProps> = ({ open, onClose, movieId }) => {
+  const navigate = useNavigate();
   const { isMobile } = useResponsive();
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [credits, setCredits] = useState<{ cast: Credit[]; director: Credit | null }>({ cast: [], director: null });
@@ -113,6 +115,13 @@ const MovieDetailModal: React.FC<MovieDetailModalProps> = ({ open, onClose, movi
     }
     // 기본적으로 TMDB 제공 링크 사용
     return watchProviders?.link || '#';
+  };
+
+  const handleBoardClick = () => {
+    if (movieId) {
+      onClose();  // 모달 닫기
+      navigate(`/movie/${movieId}/board`);
+    }
   };
 
   if (!open) return null;
@@ -205,6 +214,13 @@ const MovieDetailModal: React.FC<MovieDetailModalProps> = ({ open, onClose, movi
                     🎬 감독: {credits.director.name}
                   </p>
                 )}
+
+                <button 
+                  className="movie-detail-board-button"
+                  onClick={handleBoardClick}
+                >
+                  💬 게시판 바로가기
+                </button>
 
                 {/* 스트리밍 플랫폼 */}
                 {watchProviders && (watchProviders.flatrate || watchProviders.rent || watchProviders.buy) && (
