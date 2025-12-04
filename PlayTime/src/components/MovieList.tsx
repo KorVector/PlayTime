@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, memo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
-import { doc, setDoc, deleteDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, collection, getDocs, serverTimestamp, getDoc, increment, updateDoc } from 'firebase/firestore';
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -130,9 +130,10 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
     
     try {
       const movieRef = doc(db, 'favorites', user.uid, 'movies', String(movie.id));
+      const movieLikeCountRef = doc(db, 'movieLikeCounts', String(movie.id));
       
       if (liked) {
-        // Add to Firestore
+        // Add to personal favorites
         await setDoc(movieRef, {
           movieId: movie.id,
           title: movie.title,
@@ -141,10 +142,49 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
           rating: String(movie.vote_average),
           addedAt: serverTimestamp(),
         });
+        
+        // Update global like count
+        const movieLikeCountDoc = await getDoc(movieLikeCountRef);
+        if (movieLikeCountDoc.exists()) {
+          // Document exists, increment likeCount
+          await updateDoc(movieLikeCountRef, {
+            likeCount: increment(1),
+            updatedAt: serverTimestamp(),
+          });
+        } else {
+          // Document doesn't exist, create it
+          await setDoc(movieLikeCountRef, {
+            movieId: movie.id,
+            title: movie.title,
+            poster_path: movie.poster_path,
+            vote_average: movie.vote_average,
+            release_date: movie.release_date || '',
+            likeCount: 1,
+            updatedAt: serverTimestamp(),
+          });
+        }
+        
         setLikedIds((s) => (s.includes(movie.id) ? s : [movie.id, ...s]));
       } else {
-        // Remove from Firestore
+        // Remove from personal favorites
         await deleteDoc(movieRef);
+        
+        // Decrement global like count
+        const movieLikeCountDoc = await getDoc(movieLikeCountRef);
+        if (movieLikeCountDoc.exists()) {
+          const currentCount = movieLikeCountDoc.data().likeCount || 0;
+          if (currentCount <= 1) {
+            // If count will be 0 or less, delete the document
+            await deleteDoc(movieLikeCountRef);
+          } else {
+            // Decrement the count
+            await updateDoc(movieLikeCountRef, {
+              likeCount: increment(-1),
+              updatedAt: serverTimestamp(),
+            });
+          }
+        }
+        
         setLikedIds((s) => s.filter((id) => id !== movie.id));
       }
     } catch (e) {
