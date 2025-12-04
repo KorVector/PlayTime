@@ -185,6 +185,8 @@ const FeaturesSection: React.FC = () => {
       navigate('/live-chat');
     } else if (id === 2) {
       navigate('/chat-main');
+    } else if (id === 3) {
+      navigate('/popular-movies');
     } else {
       console.log(`Feature ${id} clicked`);
     }
