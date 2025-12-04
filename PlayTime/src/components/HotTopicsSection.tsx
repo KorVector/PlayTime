@@ -78,10 +78,7 @@ const HotTopicsSection: React.FC = () => {
             </div>
           ))}
         </div>
-
-        <div className="hot-topics-cta">
-          <button className="view-all-button">모든 토론 보기</button>
-        </div>
+        
       </div>
     </section>
   );
