@@ -20,6 +20,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LiveChatRoom from './pages/LiveChatRoom';
 import ChatMainPage from './pages/ChatMainPage';
 import MovieChatListPage from './pages/MovieChatListPage';
+import MovieListPage from './pages/MovieListPage';
 import MovieBoardPage from './pages/MovieBoardPage';
 import GenreListPage from './pages/GenreListPage';
 import GenreBoardPage from './pages/GenreBoardPage';
@@ -98,6 +99,7 @@ function App() {
             <Route path="/live-chat" element={<ProtectedRoute><LiveChatRoom /></ProtectedRoute>} />
             <Route path="/chat-main" element={<ProtectedRoute><ChatMainPage /></ProtectedRoute>} />
             <Route path="/movie-chat-list" element={<ProtectedRoute><MovieChatListPage /></ProtectedRoute>} />
+            <Route path="/movie-list" element={<MovieListPage />} />
             <Route path="/movie/:movieId/board" element={<ProtectedRoute><MovieBoardPage /></ProtectedRoute>} />
             <Route path="/genres" element={<ProtectedRoute><GenreListPage /></ProtectedRoute>} />
             <Route path="/genre/:genreId/board" element={<ProtectedRoute><GenreBoardPage /></ProtectedRoute>} />
