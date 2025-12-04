@@ -48,16 +48,7 @@ const PostDetailPage: React.FC = () => {
   const [commentsError, setCommentsError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
-  const commentsEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const scrollToBottom = () => {
-    commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [comments]);
 
   // Firestore에서 게시글 가져오기
   useEffect(() => {
@@ -351,7 +342,6 @@ const PostDetailPage: React.FC = () => {
                 </div>
               ))
             )}
-            <div ref={commentsEndRef} />
           </div>
 
           <form className="comment-form" onSubmit={handleSubmitComment}>
