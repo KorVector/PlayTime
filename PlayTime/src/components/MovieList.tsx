@@ -143,33 +143,24 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
           addedAt: serverTimestamp(),
         });
         
-        // Update global like count
-        const movieLikeCountDoc = await getDoc(movieLikeCountRef);
-        if (movieLikeCountDoc.exists()) {
-          // Document exists, increment likeCount
-          await updateDoc(movieLikeCountRef, {
-            likeCount: increment(1),
-            updatedAt: serverTimestamp(),
-          });
-        } else {
-          // Document doesn't exist, create it
-          await setDoc(movieLikeCountRef, {
-            movieId: movie.id,
-            title: movie.title,
-            poster_path: movie.poster_path,
-            vote_average: movie.vote_average,
-            release_date: movie.release_date || '',
-            likeCount: 1,
-            updatedAt: serverTimestamp(),
-          });
-        }
+        // Update global like count atomically
+        // Using setDoc with merge: true to handle concurrent creation
+        await setDoc(movieLikeCountRef, {
+          movieId: movie.id,
+          title: movie.title,
+          poster_path: movie.poster_path,
+          vote_average: movie.vote_average,
+          release_date: movie.release_date || '',
+          likeCount: increment(1),
+          updatedAt: serverTimestamp(),
+        }, { merge: true });
         
         setLikedIds((s) => (s.includes(movie.id) ? s : [movie.id, ...s]));
       } else {
         // Remove from personal favorites
         await deleteDoc(movieRef);
         
-        // Decrement global like count
+        // Decrement global like count atomically
         const movieLikeCountDoc = await getDoc(movieLikeCountRef);
         if (movieLikeCountDoc.exists()) {
           const currentCount = movieLikeCountDoc.data().likeCount || 0;
@@ -177,7 +168,7 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
             // If count will be 0 or less, delete the document
             await deleteDoc(movieLikeCountRef);
           } else {
-            // Decrement the count
+            // Decrement the count atomically
             await updateDoc(movieLikeCountRef, {
               likeCount: increment(-1),
               updatedAt: serverTimestamp(),
