@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, query, orderBy, limit, onSnapshot, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -51,7 +51,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onRecommendClick }) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
 
   // 인기 영화 가져오기
   useEffect(() => {
@@ -88,11 +87,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onRecommendClick }) => {
 
     return () => unsubscribe();
   }, []);
-
-  // 채팅 스크롤
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,7 +212,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onRecommendClick }) => {
                   </div>
                 ))
               )}
-              <div ref={chatEndRef} />
             </div>
 
             {user ? (

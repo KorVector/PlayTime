@@ -32,16 +32,7 @@ const LiveChatRoom: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   // Firebase Firestore 실시간 메시지 구독
   useEffect(() => {
@@ -224,7 +215,6 @@ const LiveChatRoom: React.FC = () => {
               </div>
             ))
           )}
-          <div ref={messagesEndRef} />
         </div>
 
         <form className="message-input-form" onSubmit={handleSendMessage}>
