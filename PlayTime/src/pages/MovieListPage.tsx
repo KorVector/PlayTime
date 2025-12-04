@@ -31,6 +31,11 @@ const MovieListPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // 페이지 진입 및 페이지 전환 시 스크롤 맨 위로
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
   useEffect(() => {
     const fetchMovies = async () => {
       if (!API_KEY) {
@@ -69,7 +74,6 @@ const MovieListPage: React.FC = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const renderPagination = () => {
