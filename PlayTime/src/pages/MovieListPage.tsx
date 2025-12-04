@@ -33,7 +33,7 @@ const MovieListPage: React.FC = () => {
 
   // 페이지 진입 및 페이지 전환 시 스크롤 맨 위로
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentPage]);
 
   useEffect(() => {
