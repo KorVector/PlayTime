@@ -53,7 +53,7 @@ const ChatMainPage: React.FC = () => {
               <div className="menu-icon">{item.icon}</div>
               <h2 className="menu-title">{item.title}</h2>
               <p className="menu-description">{item.description}</p>
-              <button className="menu-button">입장하기 →</button>
+              <button className="menu-button">입장하기 →</button> 
             </div>
           ))}
         </div>
