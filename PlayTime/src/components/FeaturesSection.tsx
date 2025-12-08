@@ -162,21 +162,21 @@ const FeaturesSection: React.FC = () => {
       title: '사용자 채팅방',
       description: '24시간 영화 감상 채팅 서비스 제공',
       buttonText: '바로가기',
-      emoji: '💬',
+      emoji: '👫',
     },
     {
       id: 2,
       title: '소통 커뮤니티',
       description: '영화 감상평을 남길 수 있는 커뮤니티를 제공',
       buttonText: '바로가기',
-      emoji: '💜',
+      emoji: '💬',
     },
     {
       id: 3,
-      title: '영화 시청 시간 타이머',
-      description: '시청한 영화 시간을 체크하고 순위를 제공',
+      title: '인기 찜 영화 랭킹',
+      description: '가장 많은 찜을 받은 영화 순위를 제공',
       buttonText: '바로가기',
-      emoji: '🕓',
+      emoji: '💜',
     },
   ];
 
