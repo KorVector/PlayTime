@@ -184,7 +184,6 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
   };
 
   return (
-    
     <>
       {loading && <p style={{ color: 'white', textAlign: 'center' }}>로딩 중...</p>}
       {error && <p style={{ color: 'salmon', textAlign: 'center' }}>{error}</p>}
