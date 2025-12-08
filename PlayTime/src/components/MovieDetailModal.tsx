@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useResponsive } from '../hooks/useResponsive';
 import '../styles/MovieDetailModal.css';
+import HeartIcon from './HeartIcon'; // 🔹 추가
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -11,6 +12,12 @@ interface MovieDetailModalProps {
   open: boolean;
   onClose: () => void;
   movieId: number | null;
+
+  // 🔹 찜하기 관련 props 추가
+  isLiked?: boolean;
+  isAuthenticated?: boolean;
+  onLikeClick?: (liked: boolean) => void;
+  onAuthRequired?: () => void;
 }
 
 interface MovieDetail {
@@ -63,13 +70,30 @@ const PROVIDER_LINKS: { [key: string]: string } = {
   'Apple TV': 'https://tv.apple.com/search?term=',
 };
 
-const MovieDetailModal: React.FC<MovieDetailModalProps> = ({ open, onClose, movieId }) => {
+const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
+  open,
+  onClose,
+  movieId,
+  // 🔹 모달에서 사용할 초기 찜 상태/로그인 상태/콜백들
+  isLiked: initialLiked = false,
+  isAuthenticated = false,
+  onLikeClick,
+  onAuthRequired,
+}) => {
   const navigate = useNavigate();
   const { isMobile } = useResponsive();
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [credits, setCredits] = useState<{ cast: Credit[]; director: Credit | null }>({ cast: [], director: null });
   const [watchProviders, setWatchProviders] = useState<WatchProviders | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // 🔹 모달 내부에서 관리할 찜 상태
+  const [isLiked, setIsLiked] = useState(initialLiked);
+
+  // 🔹 부모에서 isLiked가 바뀌면 모달도 동기화
+  useEffect(() => {
+    setIsLiked(initialLiked);
+  }, [initialLiked]);
 
   useEffect(() => {
     if (open && movieId) {
@@ -122,6 +146,18 @@ const MovieDetailModal: React.FC<MovieDetailModalProps> = ({ open, onClose, movi
       onClose();  // 모달 닫기
       navigate(`/movie/${movieId}/board`);
     }
+  };
+
+  // 🔹 찜하기 클릭 핸들러
+  const handleLikeClick = () => {
+    if (!isAuthenticated) {
+      onAuthRequired?.();
+      return;
+    }
+
+    const newLikedState = !isLiked;
+    setIsLiked(newLikedState);
+    onLikeClick?.(newLikedState); // 부모에게도 전달
   };
 
   if (!open) return null;
@@ -214,13 +250,22 @@ const MovieDetailModal: React.FC<MovieDetailModalProps> = ({ open, onClose, movi
                     🎬 감독: {credits.director.name}
                   </p>
                 )}
+                
+                {/* 🔹 게시판 버튼 + 찜하기 버튼 나란히 배치 */}
+                <div className="movie-detail-actions">
+                  <button 
+                    className="movie-detail-board-button"
+                    onClick={handleBoardClick}
+                  >
+                    💬 게시판 바로가기
+                  </button>
 
-                <button 
-                  className="movie-detail-board-button"
-                  onClick={handleBoardClick}
-                >
-                  💬 게시판 바로가기
-                </button>
+                  <HeartIcon 
+                    liked={isLiked}
+                    onClick={handleLikeClick}
+                    className="movie-detail-like-button"
+                  />
+                </div>
 
                 {/* 스트리밍 플랫폼 */}
                 {watchProviders && (watchProviders.flatrate || watchProviders.rent || watchProviders.buy) && (
