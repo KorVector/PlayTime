@@ -207,6 +207,12 @@ const MovieListPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      <MovieDetailModal 
+        open={detailOpen} 
+        onClose={() => setDetailOpen(false)} 
+        movieId={selectedMovieId} 
+      />
     </div>
   );
 };

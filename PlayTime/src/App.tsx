@@ -81,7 +81,7 @@ function App() {
           <ProfileEditModal open={profileEditOpen} onClose={() => setProfileEditOpen(false)} />
           <UserSearchModal open={userSearchOpen} onClose={() => setUserSearchOpen(false)} />
           <MovieRecommendModal open={recommendOpen} onClose={() => setRecommendOpen(false)} />
-
+          <MovieDetailModal open={detailOpen} onClose={() => setDetailOpen(false)} movieId={selectedMovieId} />
           
           <Routes>
             <Route path="/" element={<HomePage onAuthRequired={handleAuthRequired} onRecommendClick={handleRecommendClick} onMovieClick={handleMovieClick} />} />
