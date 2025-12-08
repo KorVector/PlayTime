@@ -15,13 +15,10 @@ import ProfileEditModal from './components/ProfileEditModal';
 import UserSearchModal from './components/UserSearchModal';
 import MovieRecommendModal from './components/MovieRecommendModal';
 import MovieDetailModal from './components/MovieDetailModal';
-import NotificationModal from './components/NotificationModal';
 import ProtectedRoute from './components/ProtectedRoute';
 import LiveChatRoom from './pages/LiveChatRoom';
 import ChatMainPage from './pages/ChatMainPage';
 import MovieChatListPage from './pages/MovieChatListPage';
-import MovieListPage from './pages/MovieListPage';
-import PopularMoviesPage from './pages/PopularMoviesPage';
 import MovieBoardPage from './pages/MovieBoardPage';
 import GenreListPage from './pages/GenreListPage';
 import GenreBoardPage from './pages/GenreBoardPage';
@@ -56,7 +53,6 @@ function App() {
   const [userSearchOpen, setUserSearchOpen] = useState(false);
   const [recommendOpen, setRecommendOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [notificationOpen, setNotificationOpen] = useState(false);
   const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
 
   // expose a small global helper so Header can open the liked modal without prop-drilling
@@ -67,13 +63,6 @@ function App() {
   (window as typeof window & { openProfileEdit?: () => void }).openProfileEdit = () => setProfileEditOpen(true);
   // expose user search modal opener
   (window as typeof window & { openUserSearch?: () => void }).openUserSearch = () => setUserSearchOpen(true);
-  // expose movie detail modal opener
-  (window as typeof window & { openMovieDetail?: (movieId: number) => void }).openMovieDetail = (movieId: number) => {
-    setSelectedMovieId(movieId);
-    setDetailOpen(true);
-  };
-  // expose notification modal opener
-  (window as typeof window & { openNotifications?: () => void }).openNotifications = () => setNotificationOpen(true);
 
   const handleAuthRequired = () => setAuthOpen(true);
   const handleRecommendClick = () => setRecommendOpen(true);
@@ -92,16 +81,13 @@ function App() {
           <ProfileEditModal open={profileEditOpen} onClose={() => setProfileEditOpen(false)} />
           <UserSearchModal open={userSearchOpen} onClose={() => setUserSearchOpen(false)} />
           <MovieRecommendModal open={recommendOpen} onClose={() => setRecommendOpen(false)} />
-          <MovieDetailModal open={detailOpen} onClose={() => setDetailOpen(false)} movieId={selectedMovieId} />
-          <NotificationModal open={notificationOpen} onClose={() => setNotificationOpen(false)} />
+
           
           <Routes>
             <Route path="/" element={<HomePage onAuthRequired={handleAuthRequired} onRecommendClick={handleRecommendClick} onMovieClick={handleMovieClick} />} />
             <Route path="/live-chat" element={<ProtectedRoute><LiveChatRoom /></ProtectedRoute>} />
             <Route path="/chat-main" element={<ProtectedRoute><ChatMainPage /></ProtectedRoute>} />
             <Route path="/movie-chat-list" element={<ProtectedRoute><MovieChatListPage /></ProtectedRoute>} />
-            <Route path="/movie-list" element={<MovieListPage />} />
-            <Route path="/popular-movies" element={<PopularMoviesPage />} />
             <Route path="/movie/:movieId/board" element={<ProtectedRoute><MovieBoardPage /></ProtectedRoute>} />
             <Route path="/genres" element={<ProtectedRoute><GenreListPage /></ProtectedRoute>} />
             <Route path="/genre/:genreId/board" element={<ProtectedRoute><GenreBoardPage /></ProtectedRoute>} />

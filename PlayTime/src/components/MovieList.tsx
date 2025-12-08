@@ -1,7 +1,24 @@
-import { useEffect, useState, useMemo, memo, useCallback } from 'react';
+// src/components/MovieList.tsx
+import {
+  useEffect,
+  useState,
+  useMemo,
+  memo,
+  useCallback,
+} from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
-import { doc, setDoc, deleteDoc, collection, getDocs, serverTimestamp, getDoc, increment, updateDoc } from 'firebase/firestore';
+import {
+  doc,
+  setDoc,
+  deleteDoc,
+  collection,
+  getDocs,
+  serverTimestamp,
+  getDoc,
+  increment,
+  updateDoc,
+} from 'firebase/firestore';
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -18,10 +35,11 @@ interface TmdbMovie {
 }
 
 import MovieCard from './MovieCard';
+import MovieDetailModal from './MovieDetailModal';
 
 interface MovieListProps {
   onAuthRequired?: () => void;
-  onMovieClick?: (movieId: number) => void;
+  onMovieClick?: (movieId: number) => void; // 상위에서 필요하면 사용
 }
 
 function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
@@ -30,10 +48,16 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // 상세 모달 제어용 상태
+  const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+
   useEffect(() => {
     const fetchMovies = async () => {
       if (!API_KEY) {
-        setError('API 키가 설정되어 있지 않습니다. `.env` 파일에 `VITE_TMDB_API_KEY`가 있는지 확인하세요.');
+        setError(
+          'API 키가 설정되어 있지 않습니다. `.env` 파일에 `VITE_TMDB_API_KEY`가 있는지 확인하세요.',
+        );
         return;
       }
 
@@ -41,7 +65,6 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
       setError(null);
 
       try {
-        // 여러 페이지와 카테고리에서 영화 가져오기
         const endpoints = [
           `${BASE_URL}/movie/popular?language=ko-KR&page=1&api_key=${API_KEY}`,
           `${BASE_URL}/movie/popular?language=ko-KR&page=2&api_key=${API_KEY}`,
@@ -49,14 +72,13 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
           `${BASE_URL}/movie/top_rated?language=ko-KR&page=1&api_key=${API_KEY}`,
         ];
 
-        const responses = await Promise.all(endpoints.map(url => fetch(url)));
-        const dataArray = await Promise.all(responses.map(res => res.json()));
-        
-        // 모든 영화를 합치고 중복 제거
+        const responses = await Promise.all(endpoints.map((url) => fetch(url)));
+        const dataArray = await Promise.all(responses.map((res) => res.json()));
+
         const allMovies: TmdbMovie[] = [];
         const seenIds = new Set<number>();
-        
-        dataArray.forEach(data => {
+
+        dataArray.forEach((data) => {
           (data.results || []).forEach((movie: TmdbMovie) => {
             if (!seenIds.has(movie.id)) {
               seenIds.add(movie.id);
@@ -68,7 +90,9 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
         setMovies(allMovies);
       } catch (err: unknown) {
         console.error(err);
-        setError('영화 데이터를 불러오는 중 오류가 발생했습니다. 콘솔을 확인하세요.');
+        setError(
+          '영화 데이터를 불러오는 중 오류가 발생했습니다. 콘솔을 확인하세요.',
+        );
       } finally {
         setLoading(false);
       }
@@ -77,7 +101,6 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
     fetchMovies();
   }, []);
 
-  // helper: shuffle and pick up to N movies (default 12)
   const getRandomMovies = (arr: TmdbMovie[], count = 12) => {
     const copy = arr.slice();
     for (let i = copy.length - 1; i > 0; i--) {
@@ -87,25 +110,23 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
     return copy.slice(0, Math.min(count, copy.length));
   };
 
-  // pick 12 movies to display (computed once per `movies` change to avoid reshuffle on every render)
   const displayed = useMemo(() => getRandomMovies(movies, 12), [movies]);
 
-  // liked state
+  // 찜 상태
   const [likedIds, setLikedIds] = useState<number[]>([]);
 
-  // Load liked IDs from Firestore
   const loadLikedIds = useCallback(async () => {
     if (!user) {
       setLikedIds([]);
       return;
     }
-    
+
     try {
       const favoritesRef = collection(db, 'favorites', user.uid, 'movies');
       const snapshot = await getDocs(favoritesRef);
       const ids: number[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
         ids.push(data.movieId);
       });
       setLikedIds(ids);
@@ -115,7 +136,6 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
     }
   }, [user]);
 
-  // Load liked state when user changes
   useEffect(() => {
     loadLikedIds();
   }, [loadLikedIds]);
@@ -123,17 +143,15 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
   const isMovieLiked = (id: number) => likedIds.includes(id);
 
   const toggleLike = async (movie: TmdbMovie, liked: boolean) => {
-    // Defense in depth: ensure user is authenticated before modifying favorites
     if (!user) {
       return;
     }
-    
+
     try {
       const movieRef = doc(db, 'favorites', user.uid, 'movies', String(movie.id));
       const movieLikeCountRef = doc(db, 'movieLikeCounts', String(movie.id));
-      
+
       if (liked) {
-        // Add to personal favorites
         await setDoc(movieRef, {
           movieId: movie.id,
           title: movie.title,
@@ -142,40 +160,38 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
           rating: String(movie.vote_average),
           addedAt: serverTimestamp(),
         });
-        
-        // Update global like count atomically
-        // Using setDoc with merge: true to handle concurrent creation
-        await setDoc(movieLikeCountRef, {
-          movieId: movie.id,
-          title: movie.title,
-          poster_path: movie.poster_path,
-          vote_average: movie.vote_average,
-          release_date: movie.release_date || '',
-          likeCount: increment(1),
-          updatedAt: serverTimestamp(),
-        }, { merge: true });
-        
+
+        await setDoc(
+          movieLikeCountRef,
+          {
+            movieId: movie.id,
+            title: movie.title,
+            poster_path: movie.poster_path,
+            vote_average: movie.vote_average,
+            release_date: movie.release_date || '',
+            likeCount: increment(1),
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true },
+        );
+
         setLikedIds((s) => (s.includes(movie.id) ? s : [movie.id, ...s]));
       } else {
-        // Remove from personal favorites
         await deleteDoc(movieRef);
-        
-        // Decrement global like count atomically
+
         const movieLikeCountDoc = await getDoc(movieLikeCountRef);
         if (movieLikeCountDoc.exists()) {
           const currentCount = movieLikeCountDoc.data().likeCount || 0;
           if (currentCount <= 1) {
-            // If count will be 0 or less, delete the document
             await deleteDoc(movieLikeCountRef);
           } else {
-            // Decrement the count atomically
             await updateDoc(movieLikeCountRef, {
               likeCount: increment(-1),
               updatedAt: serverTimestamp(),
             });
           }
         }
-        
+
         setLikedIds((s) => s.filter((id) => id !== movie.id));
       }
     } catch (e) {
@@ -183,12 +199,29 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
     }
   };
 
+  const handleCardClick = (movieId: number) => {
+    setSelectedMovieId(movieId);
+    setIsDetailOpen(true);
+    onMovieClick?.(movieId); // 상위에서도 필요하면 사용
+  };
+
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+  };
+
+  const selectedMovie = selectedMovieId
+    ? movies.find((m) => m.id === selectedMovieId)
+    : null;
+
   return (
     <>
-      {loading && <p style={{ color: 'white', textAlign: 'center' }}>로딩 중...</p>}
-      {error && <p style={{ color: 'salmon', textAlign: 'center' }}>{error}</p>}
+      {loading && (
+        <p style={{ color: 'white', textAlign: 'center' }}>로딩 중...</p>
+      )}
+      {error && (
+        <p style={{ color: 'salmon', textAlign: 'center' }}>{error}</p>
+      )}
 
-      {/* return just the MovieCard elements (no outer container) so MovieCarousel can layout them */}
       {displayed.map((m) => (
         <MovieCard
           key={m.id}
@@ -197,19 +230,40 @@ function MovieList({ onAuthRequired, onMovieClick }: MovieListProps) {
           title={m.title}
           date={m.release_date || ''}
           rating={String(m.vote_average)}
-          
           onChatClick={() => console.log(`채팅방 진입: ${m.title}`)}
           onLikeClick={(liked) => toggleLike(m, liked)}
           isLiked={isMovieLiked(m.id)}
           isAuthenticated={!!user}
           onAuthRequired={onAuthRequired}
-          onMovieClick={onMovieClick}
+          onMovieClick={handleCardClick}
         />
       ))}
 
       {displayed.length === 0 && !loading && !error && (
-        <p style={{ color: '#999', textAlign: 'center', marginTop: 12 }}>데이터가 없습니다.</p>
+        <p
+          style={{
+            color: '#999',
+            textAlign: 'center',
+            marginTop: 12,
+          }}
+        >
+          데이터가 없습니다.
+        </p>
       )}
+
+      {/* ✅ 상세 모달: 카드와 같은 찜 상태/토글 사용 */}
+      <MovieDetailModal
+        open={isDetailOpen}
+        onClose={handleCloseDetail}
+        movieId={selectedMovieId}
+        isLiked={selectedMovieId ? !!(selectedMovieId && isMovieLiked(selectedMovieId)) : false}
+        isAuthenticated={!!user}
+        onAuthRequired={onAuthRequired}
+        onLikeClick={(liked) => {
+          if (!selectedMovie || !selectedMovieId) return;
+          toggleLike(selectedMovie, liked);
+        }}
+      />
     </>
   );
 }
