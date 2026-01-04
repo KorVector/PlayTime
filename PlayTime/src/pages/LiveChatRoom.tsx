@@ -33,6 +33,7 @@ const LiveChatRoom: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Firebase Firestore 실시간 메시지 구독
   useEffect(() => {
@@ -62,6 +63,13 @@ const LiveChatRoom: React.FC = () => {
 
     return () => unsubscribe();
   }, []);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,7 +173,7 @@ const LiveChatRoom: React.FC = () => {
           </div>
         </div>
 
-        <div className="messages-container">
+        <div className="messages-container" ref={messagesContainerRef}>
           {loading ? (
             <div className="loading-messages">메시지를 불러오는 중...</div>
           ) : error ? (
